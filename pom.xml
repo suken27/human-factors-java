@@ -11,7 +11,7 @@
 	<groupId>com.suken27</groupId>
 	<artifactId>human-factors-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>human-factors-java</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
