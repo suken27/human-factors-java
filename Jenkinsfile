@@ -1,8 +1,28 @@
+def CONTAINER_NAME = "human-factors-java"
+
 node {
     stage('SCM Checkout') {
         checkout scm
     }
-    stage('Initial test') {
-        sh 'docker build -t suken27/humanfactors .'
+    stage('Build docker image') {
+        sh 'docker build -t suken27/human-factors-java .'
+    }
+    stage('Push to registry') {
+        sh 'docker tag human-factors-java suken27/suken27/human-factors-java'
+        sh 'docker push suken27/human-factors-java'
+        sh 'docker rmi -f human-factors-java suken27/humanfactors'
+    }
+    stage('Deploy') {
+        def container_exists = sh ( script: "docker container inspect -f '{{.State.Status}}' ${CONTAINER_NAME}", returnStatus: true )
+		if (container_exists == 0) {
+			def container_status = sh ( script: "docker container inspect -f '{{.State.Status}}' ${CONTAINER_NAME}", returnStdout: true )
+			container_status = container_status - '\n'
+			echo "Container status: ${container_status}"
+			if ( container_status == 'running') {
+				echo "Container ${CONTAINER_NAME} is already running. Stopping and removing container to start it again."
+				sh "docker stop ${CONTAINER_NAME}"
+			}
+		}
+		sh "docker run --rm -d -p 8081:8081 --name ${CONTAINER_NAME} suken27/human-factors-java:latest"
     }
 }
