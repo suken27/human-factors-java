@@ -25,8 +25,8 @@ public class LoadDatabase {
         teamManager1.setPassword("pepePassword1");
         teamManager2.setPassword("pacoPassword2");
         return args -> {
-            log.info("Prealoading " + repository.save(teamManager1));
-            log.info("Prealoading " + repository.save(teamManager2));
+            log.info("Prealoading {}", repository.save(teamManager1));
+            log.info("Prealoading {}", repository.save(teamManager2));
         };
     }
 

@@ -23,11 +23,10 @@ public abstract class User {
     private String password;
 
     @Column(nullable = false)
-    private Role role;
+    private Role role = Role.USER;
 
     protected User() {
         super();
-        role = Role.ROLE_USER;
     }
 
     public void setId(Long id) {
@@ -97,9 +96,7 @@ public abstract class User {
                 return false;
         } else if (!password.equals(other.password))
             return false;
-        if (role != other.role)
-            return false;
-        return true;
+        return (role != other.role);
     }
 
     @Override
