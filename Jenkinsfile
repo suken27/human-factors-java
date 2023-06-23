@@ -9,7 +9,7 @@ node {
     }
     stage('Push to registry') {
         sh 'docker tag human-factors-java localhost:5000/human-factors-java'
-        sh 'docker push suken27/human-factors-java'
+        sh 'docker push localhost:5000/human-factors-java'
         sh 'docker rmi -f human-factors-java localhost:5000/human-factors-java'
     }
     stage('Deploy') {
