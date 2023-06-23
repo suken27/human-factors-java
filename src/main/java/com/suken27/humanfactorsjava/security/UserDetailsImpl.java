@@ -8,7 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class SecurityUser implements UserDetails {
+public class UserDetailsImpl implements UserDetails {
     
     public static final String ROLE_PREFIX = "ROLE_";
 
@@ -16,7 +16,7 @@ public class SecurityUser implements UserDetails {
     private String password;
     private String role;
 
-    public SecurityUser(String email, String password, String role) {
+    public UserDetailsImpl(String email, String password, String role) {
         super();
         this.email = email;
         this.password = password;
