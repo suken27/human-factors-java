@@ -5,9 +5,10 @@ node {
         checkout scm
     }
     stage('Build docker image') {
-        sh 'docker build -t human-factors-java localhost:5000/human-factors-java --no-cache .'
+        sh 'docker build -t human-factors-java --no-cache .'
     }
     stage('Push to registry') {
+        sh 'docker tag human-factors-java localhost:5000/human-factors-java'
         sh 'docker push suken27/human-factors-java'
         sh 'docker rmi -f human-factors-java localhost:5000/human-factors-java'
     }
