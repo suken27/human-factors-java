@@ -5,10 +5,9 @@ node {
         checkout scm
     }
     stage('Build docker image') {
-        sh 'docker build -t suken27/human-factors-java .'
+        sh 'docker build -t suken27/human-factors-java:human-factors-java .'
     }
     stage('Push to registry') {
-        sh 'docker tag human-factors-java suken27/suken27/human-factors-java'
         sh 'docker push suken27/human-factors-java'
         sh 'docker rmi -f human-factors-java suken27/humanfactors'
     }
