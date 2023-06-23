@@ -5,11 +5,11 @@ node {
         checkout scm
     }
     stage('Build docker image') {
-        sh 'docker build -t suken27/human-factors-java:human-factors-java .'
+        sh 'docker build -t human-factors-java localhost:5000/human-factors-java --no-cache .'
     }
     stage('Push to registry') {
         sh 'docker push suken27/human-factors-java'
-        sh 'docker rmi -f human-factors-java suken27/humanfactors'
+        sh 'docker rmi -f human-factors-java localhost:5000/human-factors-java'
     }
     stage('Deploy') {
         def container_exists = sh ( script: "docker container inspect -f '{{.State.Status}}' ${CONTAINER_NAME}", returnStatus: true )
@@ -22,6 +22,6 @@ node {
 				sh "docker stop ${CONTAINER_NAME}"
 			}
 		}
-		sh "docker run --rm -d -p 8081:8081 --name ${CONTAINER_NAME} suken27/human-factors-java:latest"
+		sh "docker run --rm -d -p 8081:8081 --name ${CONTAINER_NAME} localhost:5000/human-factors-java:latest"
     }
 }
