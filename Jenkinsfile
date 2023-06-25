@@ -23,6 +23,6 @@ node {
 				sh "docker stop ${CONTAINER_NAME}"
 			}
 		}
-		sh "docker run --rm -d -p 8081:8081 --name ${CONTAINER_NAME} localhost:5000/human-factors-java:latest"
+		sh "docker run --rm -d -p 8081:8081 --name ${CONTAINER_NAME} --restart unless-stopped localhost:5000/human-factors-java:latest"
     }
 }
