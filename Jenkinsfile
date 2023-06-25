@@ -22,6 +22,7 @@ node {
 				echo "Container ${CONTAINER_NAME} is already running. Stopping and removing container to start it again."
 				sh "docker stop ${CONTAINER_NAME}"
 			}
+			sh "docker container rm ${CONTAINER_NAME}"
 		}
 		sh "docker run -d -p 8081:8081 --name ${CONTAINER_NAME} --restart unless-stopped localhost:5000/human-factors-java:latest"
     }
