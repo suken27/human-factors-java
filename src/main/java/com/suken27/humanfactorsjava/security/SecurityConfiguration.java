@@ -44,6 +44,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationEntryPointJwt authenticationEntryPointJwt,
             DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
         http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
