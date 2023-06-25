@@ -15,11 +15,12 @@ node {
     stage('Deploy') {
         def container_exists = sh ( script: "docker container inspect -f '{{.State.Status}}' ${CONTAINER_NAME}", returnStatus: true )
 		if (container_exists == 0) {
+            echo "Container ${CONTAINER_NAME} exists already. It will be removed to create it again."
 			def container_status = sh ( script: "docker container inspect -f '{{.State.Status}}' ${CONTAINER_NAME}", returnStdout: true )
 			container_status = container_status - '\n'
 			echo "Container status: ${container_status}"
 			if ( container_status == 'running') {
-				echo "Container ${CONTAINER_NAME} is already running. Stopping and removing container to start it again."
+				echo "Container ${CONTAINER_NAME} is running. Stopping it."
 				sh "docker stop ${CONTAINER_NAME}"
 			}
 			sh "docker container rm ${CONTAINER_NAME}"
