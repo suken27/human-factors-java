@@ -50,11 +50,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody AuthDto authDto) {
         if(authDto == null || authDto.getEmail() == null || authDto.getPassword() == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Empty email or password.");
         }
         User user = repository.findByEmail(authDto.getEmail());
-        if(user == null || !user.getPassword().equals(passwordEncoder.encode(authDto.getPassword()))) {
-            return ResponseEntity.badRequest().build();
+        if(user == null || !passwordEncoder.matches(authDto.getPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("User not found, or password does not match.");
         }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
@@ -70,7 +70,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Validated @RequestBody AuthDto authDto) {
         if(authDto == null) {
-            throw new IncorrectEmailFormatException(null);
+            return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(null));
         }
         logger.debug("Request to create a new TeamManager with email: {}, password {}", authDto.getEmail(), authDto.getPassword());
         if(!validateEmail(authDto.getEmail())) {
