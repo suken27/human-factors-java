@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.suken27.humanfactorsjava.model.TeamManager;
+import com.suken27.humanfactorsjava.model.User;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.rest.dto.AuthDto;
 import com.suken27.humanfactorsjava.rest.dto.JwtResponseDto;
@@ -48,6 +49,13 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody AuthDto authDto) {
+        if(authDto == null || authDto.getEmail() == null || authDto.getPassword() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        User user = repository.findByEmail(authDto.getEmail());
+        if(user == null || !user.getPassword().equals(passwordEncoder.encode(authDto.getPassword()))) {
+            return ResponseEntity.badRequest().build();
+        }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
