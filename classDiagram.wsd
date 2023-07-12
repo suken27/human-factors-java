@@ -1,0 +1,43 @@
+@startuml
+class HumanFactor {
+double : getAverageScore()
+}
+class Action {
+string actionText
+string descriptionText
+}
+class Question {
+string questionText
+boolean : isFullyAnswered()
+double : getAverageScore()
+}
+abstract class User
+class Answer {
+timestamp date
+}
+class TeamMember
+class TeamManager
+class BibliographicSource {
+string authors
+timestamp publicationDate
+string title
+}
+class ModelController {
+void : sendQuestions()
+}
+class Team
+
+Question *-- "0..*" Answer
+Question "1..*" - "1" HumanFactor
+HumanFactor "1..*" - "0..*" Action
+HumanFactor --> HumanFactor : depends on
+User <- Answer
+User <|-- TeamMember
+User <|-- TeamManager
+TeamMember "0..*" -- "1" Team
+TeamManager "1" -- "0..1" Team
+BibliographicSource <-- Action
+HumanFactor --> BibliographicSource
+ModelController o-- User
+ModelController o- HumanFactor
+@enduml

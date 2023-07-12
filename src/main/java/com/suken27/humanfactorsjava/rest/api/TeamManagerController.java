@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.suken27.humanfactorsjava.model.Role;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
-import com.suken27.humanfactorsjava.rest.dto.TeamManagerDto;
+import com.suken27.humanfactorsjava.rest.dto.Long;
 import com.suken27.humanfactorsjava.rest.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectPasswordFormatException;
@@ -49,9 +49,9 @@ public class TeamManagerController {
     }
 
     @GetMapping("/teamManagers")
-    public List<TeamManagerDto> all() {
+    public List<Long> all() {
         List<TeamManager> allTeamManagers = repository.findAll();
-        List<TeamManagerDto> dtos = new LinkedList<>();
+        List<Long> dtos = new LinkedList<>();
         for (TeamManager teamManager : allTeamManagers) {
             dtos.add(convertToDto(teamManager));
         }
@@ -59,7 +59,7 @@ public class TeamManagerController {
     }
 
     @GetMapping("/teamManagers/{id}")
-    public TeamManagerDto one(@PathVariable Long id) {
+    public Long one(@PathVariable Long id) {
         logger.debug("Request to retreive a TeamManager with id '{}'", id);
         Optional<TeamManager> optionalEntity = repository.findById(id);
         if(!optionalEntity.isPresent()) {
@@ -70,7 +70,7 @@ public class TeamManagerController {
 
     @PostMapping("/teamManagers")
     @ResponseStatus(HttpStatus.CREATED)
-    public TeamManager createTeamManager(@RequestBody TeamManagerDto teamManagerDto) {
+    public TeamManager createTeamManager(@RequestBody Long teamManagerDto) {
         logger.debug("Request to create a new TeamManager with data: {}", teamManagerDto);
         if(!validateEmail(teamManagerDto.getEmail())) {
             throw new IncorrectEmailFormatException(teamManagerDto.getEmail());
@@ -88,11 +88,11 @@ public class TeamManagerController {
         return repository.save(entity);
     }
 
-    private TeamManagerDto convertToDto(TeamManager entity) {
-        return modelMapper.map(entity, TeamManagerDto.class);
+    private Long convertToDto(TeamManager entity) {
+        return modelMapper.map(entity, Long.class);
     }
 
-    private TeamManager convertToEntity(TeamManagerDto dto) {
+    private TeamManager convertToEntity(Long dto) {
         return modelMapper.map(dto, TeamManager.class);
     }
 
