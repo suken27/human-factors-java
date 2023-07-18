@@ -3,7 +3,6 @@ package com.suken27.humanfactorsjava.rest.api;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -19,13 +18,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.suken27.humanfactorsjava.model.Role;
+import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
-import com.suken27.humanfactorsjava.rest.dto.Long;
+import com.suken27.humanfactorsjava.rest.dto.TeamManagerDto;
 import com.suken27.humanfactorsjava.rest.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectPasswordFormatException;
 import com.suken27.humanfactorsjava.rest.exception.TeamManagerNotFoundException;
+import com.suken27.humanfactorsjava.rest.util.ApiValidator;
 
 @RestController
 public class TeamManagerController {
@@ -40,18 +41,19 @@ public class TeamManagerController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private static final Logger logger = LoggerFactory.getLogger(TeamManagerController.class);
+    private ApiValidator validator;
 
-    private static final String EMAIL_REGEX = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(TeamManagerController.class);
 
     TeamManagerController() {
         super();
     }
 
     @GetMapping("/teamManagers")
-    public List<Long> all() {
+    public List<TeamManagerDto> all() {
         List<TeamManager> allTeamManagers = repository.findAll();
-        List<Long> dtos = new LinkedList<>();
+        List<TeamManagerDto> dtos = new LinkedList<>();
         for (TeamManager teamManager : allTeamManagers) {
             dtos.add(convertToDto(teamManager));
         }
@@ -59,7 +61,7 @@ public class TeamManagerController {
     }
 
     @GetMapping("/teamManagers/{id}")
-    public Long one(@PathVariable Long id) {
+    public TeamManagerDto one(@PathVariable Long id) {
         logger.debug("Request to retreive a TeamManager with id '{}'", id);
         Optional<TeamManager> optionalEntity = repository.findById(id);
         if(!optionalEntity.isPresent()) {
@@ -70,12 +72,12 @@ public class TeamManagerController {
 
     @PostMapping("/teamManagers")
     @ResponseStatus(HttpStatus.CREATED)
-    public TeamManager createTeamManager(@RequestBody Long teamManagerDto) {
+    public TeamManager createTeamManager(@RequestBody TeamManagerDto teamManagerDto) {
         logger.debug("Request to create a new TeamManager with data: {}", teamManagerDto);
-        if(!validateEmail(teamManagerDto.getEmail())) {
+        if(!validator.isValidEmail(teamManagerDto.getEmail())) {
             throw new IncorrectEmailFormatException(teamManagerDto.getEmail());
         }
-        if(!validatePassword(teamManagerDto.getPassword())) {
+        if(!validator.isValidPassword(teamManagerDto.getPassword())) {
             throw new IncorrectPasswordFormatException();
         }
         if(repository.findByEmail(teamManagerDto.getEmail()) != null) {
@@ -84,30 +86,21 @@ public class TeamManagerController {
         teamManagerDto.setId(null);
         teamManagerDto.setPassword(passwordEncoder.encode(teamManagerDto.getPassword()));
         TeamManager entity = convertToEntity(teamManagerDto);
+        entity.setTeam(new Team());
         entity.setRole(Role.USER);
         return repository.save(entity);
     }
 
-    private Long convertToDto(TeamManager entity) {
-        return modelMapper.map(entity, Long.class);
+    private TeamManagerDto convertToDto(TeamManager entity) {
+        return modelMapper.map(entity, TeamManagerDto.class);
     }
 
-    private TeamManager convertToEntity(Long dto) {
+    private TeamManager convertToEntity(TeamManagerDto dto) {
         return modelMapper.map(dto, TeamManager.class);
     }
 
-    private boolean validateEmail(String email) {
-        if(email == null) {
-            return false;
-        }
-        return Pattern.compile(EMAIL_REGEX).matcher(email).matches();
-    }
+    
 
-    private boolean validatePassword(String password) {
-        if(password == null) {
-            return false;
-        }
-        return password.length() > 5;
-    }
+    
 
 }

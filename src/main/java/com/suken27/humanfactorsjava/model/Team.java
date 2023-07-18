@@ -62,6 +62,19 @@ public class Team {
         members.remove(member);
     }
 
+    public boolean isMember(TeamMember member) {
+        return members.contains(member);
+    }
+
+    public boolean isMember(String email) {
+        for (TeamMember teamMember : members) {
+            if(teamMember.getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

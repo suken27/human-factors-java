@@ -1,18 +1,18 @@
 package com.suken27.humanfactorsjava.rest.dto;
 
-public class Long extends UserDto {
+public class TeamManagerDto extends UserDto {
+    
+    private Long team;
 
-    private TeamDto team;
-
-    public Long() {
+    public TeamManagerDto() {
         super();
     }
 
-    public TeamDto getTeam() {
+    public Long getTeam() {
         return team;
     }
 
-    public void setTeam(TeamDto team) {
+    public void setTeam(Long team) {
         this.team = team;
     }
 
@@ -32,7 +32,7 @@ public class Long extends UserDto {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Long other = (Long) obj;
+        TeamManagerDto other = (TeamManagerDto) obj;
         if (team == null) {
             if (other.team != null)
                 return false;

@@ -1,6 +1,5 @@
 package com.suken27.humanfactorsjava.rest.api;
 
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -25,6 +24,7 @@ import com.suken27.humanfactorsjava.rest.dto.AuthDto;
 import com.suken27.humanfactorsjava.rest.dto.JwtResponseDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectPasswordFormatException;
+import com.suken27.humanfactorsjava.rest.util.ApiValidator;
 import com.suken27.humanfactorsjava.security.JwtUtils;
 
 @RestController
@@ -43,9 +43,10 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private ApiValidator validator;
 
-    private static final String EMAIL_REGEX = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody AuthDto authDto) {
@@ -73,10 +74,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(null));
         }
         logger.debug("Request to create a new TeamManager with email: {}, password {}", authDto.getEmail(), authDto.getPassword());
-        if(!validateEmail(authDto.getEmail())) {
+        if(!validator.isValidEmail(authDto.getEmail())) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(null));
         }
-        if(!validatePassword(authDto.getPassword())) {
+        if(!validator.isValidPassword(authDto.getPassword())) {
             return ResponseEntity.badRequest().body(new IncorrectPasswordFormatException());
         }
         if(repository.findByEmail(authDto.getEmail()) != null) {
@@ -87,20 +88,6 @@ public class AuthController {
         entity.setPassword(passwordEncoder.encode(authDto.getPassword()));
         repository.save(entity);
         return ResponseEntity.ok("User registered successfully.");
-    }
-
-    private boolean validateEmail(String email) {
-        if(email == null) {
-            return false;
-        }
-        return Pattern.compile(EMAIL_REGEX).matcher(email).matches();
-    }
-
-    private boolean validatePassword(String password) {
-        if(password == null) {
-            return false;
-        }
-        return password.length() > 5;
     }
 
 }

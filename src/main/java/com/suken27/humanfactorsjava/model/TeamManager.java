@@ -1,10 +1,17 @@
 package com.suken27.humanfactorsjava.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 
 @Entity
 public class TeamManager extends User {
+
+	@Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
 	@OneToOne
 	private Team team;
@@ -12,6 +19,22 @@ public class TeamManager extends User {
 	public TeamManager() {
 		super();
 	}
+
+	public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return this.role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
 	public Team getTeam() {
 		return team;
@@ -25,6 +48,8 @@ public class TeamManager extends User {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((role == null) ? 0 : role.hashCode());
 		result = prime * result + ((team == null) ? 0 : team.hashCode());
 		return result;
 	}
@@ -38,6 +63,13 @@ public class TeamManager extends User {
 		if (getClass() != obj.getClass())
 			return false;
 		TeamManager other = (TeamManager) obj;
+		if (password == null) {
+			if (other.password != null)
+				return false;
+		} else if (!password.equals(other.password))
+			return false;
+		if (role != other.role)
+			return false;
 		if (team == null) {
 			if (other.team != null)
 				return false;
@@ -48,7 +80,7 @@ public class TeamManager extends User {
 
 	@Override
 	public String toString() {
-		return "TeamManager [team=" + team + "]";
+		return "TeamManager [password=" + password + ", role=" + role + ", team=" + team + "]";
 	}
 
 }
