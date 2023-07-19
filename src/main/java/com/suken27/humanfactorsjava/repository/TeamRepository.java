@@ -7,7 +7,7 @@ import com.suken27.humanfactorsjava.model.Team;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    @Query("Select t FROM Team t JOIN t.manager m WHERE m.email = ?1")
+    @Query("Select t FROM Team t, TeamManager m WHERE t.manager = m AND m.email = ?1")
     public Team findByTeamManagerEmail(String email);
 
 }

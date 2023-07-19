@@ -1,7 +1,9 @@
 package com.suken27.humanfactorsjava.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
 @Entity
@@ -13,7 +15,8 @@ public class TeamManager extends User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-	@OneToOne(mappedBy = "manager")
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "team_id")
 	private Team team;
 
 	public TeamManager() {
