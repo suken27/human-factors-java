@@ -3,11 +3,12 @@ package com.suken27.humanfactorsjava.model;
 import java.util.Collection;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Team {
@@ -16,7 +17,8 @@ public class Team {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @OneToOne
+    @JoinColumn(name = "manager_id", referencedColumnName = "id")
     private TeamManager manager;
 
     @OneToMany(

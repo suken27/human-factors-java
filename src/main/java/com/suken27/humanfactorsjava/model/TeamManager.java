@@ -13,7 +13,7 @@ public class TeamManager extends User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-	@OneToOne
+	@OneToOne(mappedBy = "manager")
 	private Team team;
 
 	public TeamManager() {
