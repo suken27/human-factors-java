@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.suken27.humanfactorsjava.model.TeamManager;
-import com.suken27.humanfactorsjava.model.User;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.rest.dto.AuthDto;
 import com.suken27.humanfactorsjava.rest.dto.JwtResponseDto;
@@ -53,7 +52,7 @@ public class AuthController {
         if(authDto == null || authDto.getEmail() == null || authDto.getPassword() == null) {
             return ResponseEntity.badRequest().body("Empty email or password.");
         }
-        User user = repository.findByEmail(authDto.getEmail());
+        TeamManager user = repository.findByEmail(authDto.getEmail());
         if(user == null || !passwordEncoder.matches(authDto.getPassword(), user.getPassword())) {
             return ResponseEntity.badRequest().body("User not found, or password does not match.");
         }
