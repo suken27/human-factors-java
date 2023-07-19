@@ -38,7 +38,7 @@ public class TeamController {
 
     @PatchMapping("/teams")
     public ResponseEntity<?> addTeamMember(@RequestBody String email) {
-        if(email == null || validator.isValidEmail(email)) {
+        if(email == null || !validator.isValidEmail(email)) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -61,7 +61,7 @@ public class TeamController {
 
     @DeleteMapping("/teams")
     public ResponseEntity<?> removeTeamMember(@RequestBody String email) {
-        if(email == null || validator.isValidEmail(email)) {
+        if(email == null || !validator.isValidEmail(email)) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
