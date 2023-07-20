@@ -1,6 +1,7 @@
 package com.suken27.humanfactorsjava.model;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -24,10 +25,11 @@ public class Team {
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
-    private Collection<TeamMember> members;
+    private List<TeamMember> members;
 
     public Team() {
         super();
+        members = new ArrayList<>();
     }
 
     public Long getId() {
@@ -46,11 +48,11 @@ public class Team {
         this.manager = manager;
     }
 
-    public Collection<TeamMember> getMembers() {
+    public List<TeamMember> getMembers() {
         return members;
     }
 
-    public void setMembers(Collection<TeamMember> members) {
+    public void setMembers(List<TeamMember> members) {
         this.members = members;
     }
 

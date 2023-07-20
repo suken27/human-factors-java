@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.suken27.humanfactorsjava.model.DeletedTeamMember;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
+import com.suken27.humanfactorsjava.repository.DeletedTeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
@@ -29,6 +31,9 @@ public class TeamController {
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
+    private DeletedTeamMemberRepository deletedTeamMemberRepository;
 
     @Autowired
     private ApiValidator validator;
@@ -53,7 +58,7 @@ public class TeamController {
         }
         teamMember = new TeamMember();
         teamMember.setEmail(email);
-        teamMember = teamMemberRepository.save(teamMember);
+        teamMember.setTeam(team);
         team.addMember(teamMember);
         teamRepository.save(team);
         return ResponseEntity.ok().body("Team member with email '" + email + "'' added successfully.");
@@ -77,6 +82,8 @@ public class TeamController {
         }
         team.removeMember(teamMember);
         teamRepository.save(team);
+        DeletedTeamMember deletedTeamMember = new DeletedTeamMember(teamMember);
+        deletedTeamMemberRepository.save(deletedTeamMember);
         // Suggestion: Maybe the users should not be removed from database to avoid data loss.
         teamMemberRepository.delete(teamMember);
         return ResponseEntity.ok().body("Team member with email '" + email + "' removed successfully.");

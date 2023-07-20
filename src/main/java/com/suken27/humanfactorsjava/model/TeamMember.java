@@ -2,9 +2,12 @@ package com.suken27.humanfactorsjava.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 
 @Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class TeamMember extends User {
 
     @ManyToOne(fetch = FetchType.LAZY)
