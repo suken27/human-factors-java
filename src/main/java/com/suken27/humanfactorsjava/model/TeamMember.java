@@ -52,7 +52,7 @@ public class TeamMember extends User {
 
     @Override
     public String toString() {
-        return "TeamMember [team=" + team + "]";
+        return "TeamMember [team=" + team.getId() + "]";
     }
 
 }

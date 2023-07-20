@@ -106,7 +106,7 @@ public class Team {
 
     @Override
     public String toString() {
-        return "Team [id=" + id + ", manager=" + manager + ", members=" + members + "]";
+        return "Team [id=" + id + ", manager=" + manager.getEmail() + ", members=" + members + "]";
     }
 
 }
