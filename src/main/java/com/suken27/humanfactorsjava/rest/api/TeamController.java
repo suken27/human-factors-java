@@ -94,12 +94,12 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new TeamMemberNotFoundException(email));
         }
         team.removeMember(teamMember);
-        teamRepository.save(team);
+        team = teamRepository.save(team);
         DeletedTeamMember deletedTeamMember = new DeletedTeamMember(teamMember);
         deletedTeamMemberRepository.save(deletedTeamMember);
         // Suggestion: Maybe the users should not be removed from database to avoid data loss.
         teamMemberRepository.delete(teamMember);
-        return ResponseEntity.ok().body("Team member with email '" + email + "' removed successfully.");
+        return ResponseEntity.ok().body(toDto(team.getMembers()));
     }
 
     private TeamMemberDto toDto(TeamMember teamMember) {
