@@ -62,7 +62,7 @@ public class TeamControllerTest {
         teamMember.setEmail(TEST_TEAM_MEMBER_EMAIL);
         teamManager.getTeam().addMember(teamMember);
         teamRepository.save(teamManager.getTeam());
-        mockMvc.perform(MockMvcRequestBuilders.delete("/teams").content(TEST_TEAM_MEMBER_EMAIL)).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/teams/" + TEST_TEAM_MEMBER_EMAIL)).andExpect(status().isOk());
         Team team = teamRepository.findByTeamManagerEmail(teamManager.getEmail());
         assertNotNull(team);
         assertNotNull(team.getMembers());
