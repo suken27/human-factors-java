@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.suken27.humanfactorsjava.model.DeletedTeamMember;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
-import com.suken27.humanfactorsjava.repository.DeletedTeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
 import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
@@ -37,9 +35,6 @@ public class TeamController {
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
-
-    @Autowired
-    private DeletedTeamMemberRepository deletedTeamMemberRepository;
 
     @Autowired
     private ApiValidator validator;
@@ -96,10 +91,7 @@ public class TeamController {
         }
         team.removeMember(teamMember);
         team = teamRepository.save(team);
-        DeletedTeamMember deletedTeamMember = new DeletedTeamMember(teamMember);
-        deletedTeamMemberRepository.save(deletedTeamMember);
-        // Suggestion: Maybe the users should not be removed from database to avoid data loss.
-        teamMemberRepository.delete(teamMember);
+        teamMemberRepository.save(teamMember);
         return ResponseEntity.ok().body(toDto(team.getMembers()));
     }
 

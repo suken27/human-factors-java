@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +23,7 @@ public class Team {
 
     @OneToMany(
         mappedBy = "team",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
+        cascade = CascadeType.ALL
     )
     private List<TeamMember> members;
 
@@ -60,8 +60,15 @@ public class Team {
         members.add(member);
     }
 
+    /**
+     * Removes member from the team, marks it as a deleted team member, and sets the time of deletion.
+     * @param member Member to remove from the team.
+     */
     public void removeMember(TeamMember member) {
         members.remove(member);
+        member.setDeleted(true);
+        member.setDeletionTime(LocalDateTime.now());
+        member.setTeam(null);
     }
 
     public boolean isMember(TeamMember member) {

@@ -3,6 +3,8 @@ package com.suken27.humanfactorsjava.rest.api;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +17,7 @@ import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
+import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
 
 import jakarta.transaction.Transactional;
@@ -37,6 +40,9 @@ public class TeamControllerTest {
     TeamManagerRepository teamManagerRepository;
 
     @Autowired
+    TeamMemberRepository teamMemberRepository;
+
+    @Autowired
     MockMvc mockMvc;
 
     @Test
@@ -44,7 +50,7 @@ public class TeamControllerTest {
     @Transactional
     public void testAddTeamMember() throws Exception {
         TeamManager teamManager = createTestTeamManager();
-        mockMvc.perform(MockMvcRequestBuilders.patch("/teams").content(TEST_TEAM_MEMBER_EMAIL)).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.post("/teams").content(TEST_TEAM_MEMBER_EMAIL)).andExpect(status().isOk());
         Team team = teamRepository.findByTeamManagerEmail(teamManager.getEmail());
         assertNotNull(team);
         assertNotNull(team.getMembers());
@@ -63,10 +69,14 @@ public class TeamControllerTest {
         teamManager.getTeam().addMember(teamMember);
         teamRepository.save(teamManager.getTeam());
         mockMvc.perform(MockMvcRequestBuilders.delete("/teams/" + TEST_TEAM_MEMBER_EMAIL)).andExpect(status().isOk());
-        Team team = teamRepository.findByTeamManagerEmail(teamManager.getEmail());
+        Team team = teamRepository.findByTeamManagerEmail(TEST_TEAM_MANAGER_EMAIL);
         assertNotNull(team);
         assertNotNull(team.getMembers());
         assertTrue(team.getMembers().isEmpty());
+        assertNull(teamMemberRepository.findByEmail(TEST_TEAM_MEMBER_EMAIL));
+        List<TeamMember> results = teamMemberRepository.findByEmailIncludingDeleted(TEST_TEAM_MEMBER_EMAIL);
+        assertNotNull(results);
+        assertEquals(1, results.size());
     }
 
     private TeamManager createTestTeamManager() {
