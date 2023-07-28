@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.suken27.humanfactorsjava.model.TeamMember;
 
+import jakarta.transaction.Transactional;
+
 @SpringBootTest
 public class TeamMemberRepositoryTest {
 
@@ -21,6 +23,22 @@ public class TeamMemberRepositoryTest {
     private TeamMemberRepository repository;
 
     @Test
+    @Transactional
+    void testAddMember() {
+        createTeamMember(TEST_TEAM_MEMBER_EMAIL);
+        TeamMember teamMember = repository.findByEmail(TEST_TEAM_MEMBER_EMAIL);
+        assertNotNull(teamMember);
+        markTeamMemberAsRemoved(teamMember);
+        createTeamMember(TEST_TEAM_MEMBER_EMAIL);
+        List<TeamMember> results = repository.findByEmailIncludingDeleted(TEST_TEAM_MEMBER_EMAIL);
+        assertNotNull(results);
+        assertFalse(results.isEmpty());
+        removeTeamMember(teamMember);
+        removeTeamMember(results.get(0));
+    }
+
+    @Test
+    @Transactional
     void testFindByEmail() {
         createTeamMember(TEST_TEAM_MEMBER_EMAIL);
         TeamMember teamMember = repository.findByEmail(TEST_TEAM_MEMBER_EMAIL);
@@ -33,6 +51,7 @@ public class TeamMemberRepositoryTest {
     }
 
     @Test
+    @Transactional
     void testFindByEmailIncludingDeleted() {
         createTeamMember(TEST_TEAM_MEMBER_EMAIL);
         TeamMember teamMember = repository.findByEmail(TEST_TEAM_MEMBER_EMAIL);

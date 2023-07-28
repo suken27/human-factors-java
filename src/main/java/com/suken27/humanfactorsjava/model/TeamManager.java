@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.model;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
 @Entity
+@AttributeOverride(name = "email", column = @Column(unique = true))
 public class TeamManager extends User {
 
 	@Column(nullable = false)

@@ -19,7 +19,7 @@ public abstract class User {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     protected User() {

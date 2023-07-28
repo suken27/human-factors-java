@@ -2,7 +2,6 @@ package com.suken27.humanfactorsjava.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,8 +11,6 @@ import jakarta.persistence.ManyToOne;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-// The email is no longer unique since a team member may be created and removed more than once.
-@AttributeOverride(name = "email", column = @Column(unique = false))
 public class TeamMember extends User {
 
     @Column(nullable = false)
