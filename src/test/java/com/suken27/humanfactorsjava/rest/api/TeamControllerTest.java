@@ -3,8 +3,11 @@ package com.suken27.humanfactorsjava.rest.api;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,9 +29,10 @@ import jakarta.transaction.Transactional;
 @AutoConfigureMockMvc
 public class TeamControllerTest {
 
-    private final static String TEST_TEAM_MANAGER_EMAIL = "testAddMember@test.test";
+    private final static String TEST_TEAM_MANAGER_EMAIL = "testTeamManager@test.test";
     private final static String TEST_TEAM_MANAGER_PASSWORD = "testPassword";
-    private final static String TEST_TEAM_MEMBER_EMAIL = "testMember@test.test";
+    private final static String TEST_TEAM_MEMBER_EMAIL = "testTeamMember@test.test";
+    private final static String TEST_QUESTION_SENDING_TIME = "23:33";
 
     @Autowired
     TeamController controller;
@@ -45,25 +49,32 @@ public class TeamControllerTest {
     @Autowired
     MockMvc mockMvc;
 
+    private static TeamManager teamManager;
+
+    @BeforeAll
+    private static void createTestTeamManager(@Autowired TeamManagerRepository teamManagerRepository) {
+        teamManager = new TeamManager();
+        teamManager.setEmail(TEST_TEAM_MANAGER_EMAIL);
+        teamManager.setPassword(TEST_TEAM_MANAGER_PASSWORD);
+        teamManagerRepository.save(teamManager);
+    }
+
     @Test
     @WithMockUser(username=TEST_TEAM_MANAGER_EMAIL, roles={"USER"})
     @Transactional
     public void testAddTeamMember() throws Exception {
-        TeamManager teamManager = createTestTeamManager();
         mockMvc.perform(MockMvcRequestBuilders.post("/teams").content(TEST_TEAM_MEMBER_EMAIL)).andExpect(status().isOk());
-        Team team = teamRepository.findByTeamManagerEmail(teamManager.getEmail());
+        Team team = teamRepository.findByTeamManagerEmail(TEST_TEAM_MANAGER_EMAIL);
         assertNotNull(team);
         assertNotNull(team.getMembers());
         assertEquals(1, team.getMembers().size());
         assertEquals(TEST_TEAM_MEMBER_EMAIL, team.getMembers().get(0).getEmail());
-        deleteTestTeamManager(teamManager);
     }
 
     @Test
     @WithMockUser(username=TEST_TEAM_MANAGER_EMAIL, roles={"USER"})
     @Transactional
     public void testRemoveTeamMember() throws Exception {
-        TeamManager teamManager = createTestTeamManager();
         TeamMember teamMember = new TeamMember();
         teamMember.setEmail(TEST_TEAM_MEMBER_EMAIL);
         teamManager.getTeam().addMember(teamMember);
@@ -79,16 +90,17 @@ public class TeamControllerTest {
         assertEquals(1, results.size());
     }
 
-    private TeamManager createTestTeamManager() {
-        TeamManager teamManager = new TeamManager();
-        teamManager.setEmail(TEST_TEAM_MANAGER_EMAIL);
-        teamManager.setPassword(TEST_TEAM_MANAGER_PASSWORD);
-        teamManager.setTeam(new Team());
-        teamManager.getTeam().setManager(teamManager);
-        return teamManagerRepository.save(teamManager);
+    @Test
+    @WithMockUser(username=TEST_TEAM_MANAGER_EMAIL, roles={"USER"})
+    @Transactional
+    void testModifyQuestionSendingTime() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/teams/time").content(TEST_QUESTION_SENDING_TIME)).andExpect(status().isOk());
+        Team team = teamRepository.findByTeamManagerEmail(TEST_TEAM_MANAGER_EMAIL);
+        assertNotNull(team);
+        LocalTime time = team.getQuestionSendingTime();
+        assertNotNull(time);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        assertEquals(TEST_QUESTION_SENDING_TIME, time.format(dateTimeFormatter));
     }
 
-    private void deleteTestTeamManager(TeamManager teamManager) {
-        teamManagerRepository.delete(teamManager);
-    }
 }

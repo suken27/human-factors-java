@@ -23,6 +23,8 @@ public class TeamManager extends User {
 
 	public TeamManager() {
 		super();
+		team = new Team();
+		team.setManager(this);
 	}
 
 	public String getPassword() {

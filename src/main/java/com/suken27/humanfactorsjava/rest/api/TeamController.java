@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.rest.api;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +21,10 @@ import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
+import com.suken27.humanfactorsjava.rest.dto.TeamDto;
 import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
+import com.suken27.humanfactorsjava.rest.exception.IncorrectTimeFormatException;
 import com.suken27.humanfactorsjava.rest.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
 import com.suken27.humanfactorsjava.rest.exception.TeamMemberNotFoundException;
@@ -93,6 +97,19 @@ public class TeamController {
         team = teamRepository.save(team);
         teamMemberRepository.save(teamMember);
         return ResponseEntity.ok().body(toDto(team.getMembers()));
+    }
+
+    @PutMapping("/teams/time")
+    public ResponseEntity<?> modifyQuestionSendingTime(@RequestBody String questionSendingTime) {
+        LocalTime localTime = validator.parseTimeString(questionSendingTime);
+        if(localTime == null) {
+            return ResponseEntity.badRequest().body(new IncorrectTimeFormatException(questionSendingTime));
+        }
+        String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+        team.setQuestionSendingTime(localTime);
+        team = teamRepository.save(team);
+        return ResponseEntity.ok().body(new TeamDto(team));
     }
 
     private TeamMemberDto toDto(TeamMember teamMember) {

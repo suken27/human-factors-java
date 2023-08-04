@@ -22,6 +22,26 @@ public class TeamMemberRepositoryTest {
     @Autowired
     private TeamMemberRepository repository;
 
+    private void createTeamMember(String email) {
+        TeamMember teamMember = new TeamMember();
+        teamMember.setEmail(email);
+        teamMember = repository.save(teamMember);
+        assertNotNull(teamMember);
+    }
+
+    private void removeTeamMember(TeamMember teamMember) {
+        repository.delete(teamMember);
+        Optional<TeamMember> result = repository.findById(teamMember.getId());
+        assertFalse(result.isPresent());
+    }
+
+    private void markTeamMemberAsRemoved(TeamMember teamMember) {
+        teamMember.setDeleted(true);
+        teamMember.setDeletionTime(LocalDateTime.now());
+        teamMember = repository.save(teamMember);
+        assertNotNull(teamMember);
+    }
+
     @Test
     @Transactional
     void testAddMember() {
@@ -63,23 +83,4 @@ public class TeamMemberRepositoryTest {
         removeTeamMember(teamMember);
     }
 
-    private void createTeamMember(String email) {
-        TeamMember teamMember = new TeamMember();
-        teamMember.setEmail(email);
-        teamMember = repository.save(teamMember);
-        assertNotNull(teamMember);
-    }
-
-    private void removeTeamMember(TeamMember teamMember) {
-        repository.delete(teamMember);
-        Optional<TeamMember> result = repository.findById(teamMember.getId());
-        assertFalse(result.isPresent());
-    }
-
-    private void markTeamMemberAsRemoved(TeamMember teamMember) {
-        teamMember.setDeleted(true);
-        teamMember.setDeletionTime(LocalDateTime.now());
-        teamMember = repository.save(teamMember);
-        assertNotNull(teamMember);
-    }
 }

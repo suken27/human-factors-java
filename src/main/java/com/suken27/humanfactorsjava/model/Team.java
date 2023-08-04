@@ -1,8 +1,11 @@
 package com.suken27.humanfactorsjava.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -27,9 +30,13 @@ public class Team {
     )
     private List<TeamMember> members;
 
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime questionSendingTime;
+
     public Team() {
         super();
         members = new ArrayList<>();
+        questionSendingTime = LocalTime.of(9, 0);
     }
 
     public Long getId() {
@@ -84,7 +91,13 @@ public class Team {
         return false;
     }
 
-    
+    public LocalTime getQuestionSendingTime() {
+        return questionSendingTime;
+    }
+
+    public void setQuestionSendingTime(LocalTime questionSendingTime) {
+        this.questionSendingTime = questionSendingTime;
+    }
 
     @Override
     public int hashCode() {
@@ -113,7 +126,10 @@ public class Team {
 
     @Override
     public String toString() {
-        return "Team [id=" + id + ", manager=" + manager.getEmail() + ", members=" + members + "]";
+        return "Team [id=" + id + ", manager=" + manager.getId() + ", members=" + members + ", questionSendingTime="
+                + questionSendingTime + "]";
     }
+
+    
 
 }

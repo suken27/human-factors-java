@@ -3,6 +3,7 @@ package com.suken27.humanfactorsjava.rest.api;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +18,8 @@ import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
 import com.suken27.humanfactorsjava.rest.dto.AuthDto;
+
+import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,16 +40,23 @@ public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private static AuthDto dto;
+
+    @BeforeAll
+    private static void setAuthDto() {
+        dto = new AuthDto();
+        dto.setEmail("testCreateManager@test.test");
+        dto.setPassword("passwordTest");
+    }
+
     @Test
     public void contextLoads() {
         assertNotNull(controller);
     }
 
     @Test
+    @Transactional
     public void testRegisterUser() throws Exception {
-        AuthDto dto = new AuthDto();
-        dto.setEmail("testCreateManager@test.test");
-        dto.setPassword("passwordTest");
         this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
                 .content("{\"email\":\"" + dto.getEmail() + "\",\"password\":\"" + dto.getPassword() + "\"}")
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());

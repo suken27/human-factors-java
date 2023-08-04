@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.rest.dto.AuthDto;
@@ -85,9 +84,6 @@ public class AuthController {
         TeamManager entity = new TeamManager();
         entity.setEmail(authDto.getEmail());
         entity.setPassword(passwordEncoder.encode(authDto.getPassword()));
-        Team team = new Team();
-        team.setManager(entity);
-        entity.setTeam(team);
         repository.save(entity);
         return ResponseEntity.ok("User registered successfully.");
     }
