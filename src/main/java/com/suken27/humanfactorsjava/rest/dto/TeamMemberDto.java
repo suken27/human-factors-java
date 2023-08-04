@@ -1,11 +1,18 @@
 package com.suken27.humanfactorsjava.rest.dto;
 
+import com.suken27.humanfactorsjava.model.TeamMember;
+
 public class TeamMemberDto extends UserDto {
     
     private Long team;
 
     public TeamMemberDto() {
         super();
+    }
+
+    public TeamMemberDto(TeamMember entity) {
+        super(entity);
+        setTeam(entity.getTeam().getId());
     }
 
     public Long getTeam() {

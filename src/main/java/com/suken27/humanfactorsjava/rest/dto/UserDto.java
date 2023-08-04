@@ -1,5 +1,7 @@
 package com.suken27.humanfactorsjava.rest.dto;
 
+import com.suken27.humanfactorsjava.model.User;
+
 public abstract class UserDto {
     
     private Long id;
@@ -7,6 +9,11 @@ public abstract class UserDto {
 
     protected UserDto() {
         super();
+    }
+
+    protected UserDto(User entity) {
+        setId(entity.getId());
+        setEmail(entity.getEmail());
     }
 
     public Long getId() {

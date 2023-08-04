@@ -11,7 +11,7 @@ public class TeamDto {
     
     private Long id;
     private Long manager;
-    private List<Long> members;
+    private List<TeamMemberDto> members;
     private String questionSendingTime;
 
     public TeamDto() {
@@ -21,9 +21,9 @@ public class TeamDto {
     public TeamDto(Team team) {
         id = team.getId();
         manager = team.getManager().getId();
-        members = new ArrayList<Long>();
+        members = new ArrayList<>();
         for (TeamMember member : team.getMembers()) {
-            members.add(member.getId());
+            members.add(new TeamMemberDto(member));
         }
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         questionSendingTime = team.getQuestionSendingTime().format(dateTimeFormatter);
@@ -45,11 +45,11 @@ public class TeamDto {
         this.manager = manager;
     }
 
-    public List<Long> getMembers() {
+    public List<TeamMemberDto> getMembers() {
         return members;
     }
 
-    public void setMembers(List<Long> members) {
+    public void setMembers(List<TeamMemberDto> members) {
         this.members = members;
     }
 

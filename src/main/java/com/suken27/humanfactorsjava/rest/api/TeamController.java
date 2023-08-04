@@ -47,11 +47,10 @@ public class TeamController {
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
 
     @GetMapping("/teams")
-    public ResponseEntity<?> getTeamMembers() {
+    public ResponseEntity<?> getTeam() {
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
-        List<TeamMemberDto> teamMembers = toDto(team.getMembers());
-        return ResponseEntity.ok().body(teamMembers);
+        return ResponseEntity.ok().body(new TeamDto(team));
     }
 
     @PostMapping("/teams")
