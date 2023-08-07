@@ -1,43 +1,58 @@
 @startuml
 class HumanFactor {
-double : getAverageScore()
+    boolean : isFullyAnswered()
+    double : getLatestAverageScore()
+    pendiente : getImpactOrRelevance()
+}
+class HumanFactorType {
+    String title
+    String description
+    boolean onlyOnce
 }
 class Action {
-string actionText
-string descriptionText
+    
+}
+class ActionType {
+    String title
+    String description
 }
 class Question {
-string questionText
-boolean : isFullyAnswered()
-double : getAverageScore()
+    boolean : isAnswered()
+    double : getLatestScore()
+    void : addAnswer(Answer answer)
+    Answer : getLatestAnswer()
+}
+class QuestionType {
+    String questionText
 }
 abstract class User
 class Answer {
-timestamp date
+    LocalDateTime creationTime
 }
 class TeamMember
 class TeamManager
 class BibliographicSource {
-string authors
-timestamp publicationDate
-string title
+    String authors
+    LocalDate publicationDate
+    String title
 }
-class ModelController {
-void : sendQuestions()
-}
-class Team
+class Team {
 
-Question *-- "0..*" Answer
-Question "1..*" - "1" HumanFactor
-HumanFactor "1..*" - "0..*" Action
+}
+
+Answer "0..*" <--*  Question
+Question "1..*" <-* HumanFactor
+Question -> QuestionType
+HumanFactor "1..*" -- "0..*" Action
 HumanFactor --> HumanFactor : depends on
-User <- Answer
+HumanFactor -> HumanFactorType
 User <|-- TeamMember
 User <|-- TeamManager
-TeamMember "0..*" -- "1" Team
-TeamManager "1" -- "0..1" Team
-BibliographicSource <-- Action
-HumanFactor --> BibliographicSource
-ModelController o-- User
-ModelController o- HumanFactor
+TeamMember "0..*" --* Team
+TeamManager "1" -- "1" Team
+ActionType -> BibliographicSource
+Action -> ActionType
+HumanFactorType --> BibliographicSource
+QuestionType <--* HumanFactorType
+User -> HumanFactor
 @enduml

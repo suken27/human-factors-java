@@ -1,5 +1,8 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -10,6 +13,12 @@ public class Question {
     @Id
     @GeneratedValue
     private Long id;
+    private Deque<Answer> answers;
+
+    public Question() {
+        super();
+        answers = new ArrayDeque<>();
+    }
 
     public Long getId() {
         return id;
@@ -17,6 +26,14 @@ public class Question {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Deque<Answer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(Deque<Answer> answers) {
+        this.answers = answers;
     }
 
     @Override
@@ -48,7 +65,5 @@ public class Question {
     public String toString() {
         return "Question [id=" + id + "]";
     }
-
-    
 
 }
