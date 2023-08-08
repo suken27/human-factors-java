@@ -24,6 +24,8 @@ class Question {
 }
 class QuestionType {
     String questionText
+    boolean onlyForManagement
+    boolean isNegative
 }
 abstract class User
 class Answer {
@@ -52,7 +54,8 @@ TeamMember "0..*" --* Team
 TeamManager "1" -- "1" Team
 ActionType -> BibliographicSource
 Action -> ActionType
-HumanFactorType --> BibliographicSource
+HumanFactorType --> "0..*" BibliographicSource
+HumanFactorType -> HumanFactorType : depends on
 QuestionType <--* HumanFactorType
-User -> HumanFactor
+User *-> HumanFactor
 @enduml

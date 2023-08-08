@@ -43,7 +43,6 @@ public class TeamController {
     @Autowired
     private ApiValidator validator;
 
-    @Autowired
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
 
     @GetMapping("/teams")

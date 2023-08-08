@@ -13,8 +13,6 @@ public class Answer {
     @GeneratedValue
     private Long id;
 
-    private User owner;
-
     private LocalDateTime creationTime;
 
     public Long getId() {
@@ -23,14 +21,6 @@ public class Answer {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
     }
 
     public LocalDateTime getCreationTime() {

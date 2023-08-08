@@ -1,37 +1,28 @@
 package com.suken27.humanfactorsjava.model;
 
-import java.util.List;
-
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 
 /**
- * Flyweight class that registers the intrinsic state of a Human factor.
- * @see HumanFactor
+ * Flyweight class that registers the intrinsic state of an Action.
+ * @see Action
  */
 @Entity
-public class HumanFactorType {
-    
+public class ActionType {
+
     @Id
     private Long id;
+
     private String title;
     private String description;
-    private boolean onlyOnce;
-    private Cluster cluster;
-    @ManyToMany
-    private List<BibliographicSource> bibliographicSource;
-    @OneToMany
-    private List<QuestionType> questionTypes;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<HumanFactorType> dependsOn;
+    @ManyToOne
+    private BibliographicSource bibliographicSource;
 
-    public HumanFactorType() {
+    public ActionType() {
         super();
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -56,44 +47,12 @@ public class HumanFactorType {
         this.description = description;
     }
 
-    public boolean isOnlyOnce() {
-        return onlyOnce;
-    }
-
-    public void setOnlyOnce(boolean onlyOnce) {
-        this.onlyOnce = onlyOnce;
-    }
-
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
-    public List<BibliographicSource> getBibliographicSource() {
+    public BibliographicSource getBibliographicSource() {
         return bibliographicSource;
     }
 
-    public void setBibliographicSource(List<BibliographicSource> bibliographicSource) {
+    public void setBibliographicSource(BibliographicSource bibliographicSource) {
         this.bibliographicSource = bibliographicSource;
-    }
-
-    public List<QuestionType> getQuestionTypes() {
-        return questionTypes;
-    }
-
-    public void setQuestionTypes(List<QuestionType> questionTypes) {
-        this.questionTypes = questionTypes;
-    }
-
-    public List<HumanFactorType> getDependsOn() {
-        return dependsOn;
-    }
-
-    public void setDependsOn(List<HumanFactorType> dependsOn) {
-        this.dependsOn = dependsOn;
     }
 
     @Override
@@ -103,7 +62,6 @@ public class HumanFactorType {
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((title == null) ? 0 : title.hashCode());
         result = prime * result + ((description == null) ? 0 : description.hashCode());
-        result = prime * result + (onlyOnce ? 1231 : 1237);
         return result;
     }
 
@@ -115,7 +73,7 @@ public class HumanFactorType {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        HumanFactorType other = (HumanFactorType) obj;
+        ActionType other = (ActionType) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
@@ -131,15 +89,12 @@ public class HumanFactorType {
                 return false;
         } else if (!description.equals(other.description))
             return false;
-        if (onlyOnce != other.onlyOnce)
-            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "HumanFactorType [id=" + id + ", title=" + title + ", description=" + description + ", onlyOnce="
-                + onlyOnce + "]";
+        return "ActionType [id=" + id + ", title=" + title + ", description=" + description + "]";
     }
 
 }

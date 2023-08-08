@@ -44,7 +44,6 @@ public class AuthController {
     @Autowired
     private ApiValidator validator;
 
-    @Autowired
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
     @PostMapping("/login")

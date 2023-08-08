@@ -1,19 +1,20 @@
 package com.suken27.humanfactorsjava.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 /**
- * Flyweight class that registers the intrinsic state of a question.
+ * Flyweight class that registers the intrinsic state of a Question.
+ * @see Question
  */
 @Entity
 public class QuestionType {
     
     @Id
-    @GeneratedValue
     private Long id;
     private String questionText;
+    private boolean onlyForManagement;
+    private boolean isNegative;
 
     public QuestionType() {
         super();
@@ -33,6 +34,22 @@ public class QuestionType {
 
     public void setQuestionText(String questionText) {
         this.questionText = questionText;
+    }
+
+    public boolean isOnlyForManagement() {
+        return onlyForManagement;
+    }
+
+    public void setOnlyForManagement(boolean onlyForManagement) {
+        this.onlyForManagement = onlyForManagement;
+    }
+
+    public boolean isNegative() {
+        return isNegative;
+    }
+
+    public void setNegative(boolean isNegative) {
+        this.isNegative = isNegative;
     }
 
     @Override
