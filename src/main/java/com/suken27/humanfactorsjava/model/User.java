@@ -2,6 +2,7 @@ package com.suken27.humanfactorsjava.model;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,15 +22,22 @@ public abstract class User {
     @Id
     @GeneratedValue
     private Long id;
-
     @Column(nullable = false)
     private String email;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<HumanFactor> humanFactors;
 
+    /**
+     * This constructor should never be used. Use User(List<HumanFactor) instead.
+     * This constructor cannot be removed as hibernate uses the default constructor to instantiate entities.
+     */
     protected User() {
         super();
-        // TODO: Initialize every human factor
+    }
+
+    protected User(List<HumanFactor> humanFactors) {
+        super();
+        this.humanFactors = humanFactors;
     }
 
     public void setId(Long id) {

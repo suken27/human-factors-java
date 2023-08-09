@@ -33,8 +33,16 @@ public class Team {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
 
+    /**
+     * This constructor should never be used. Use Team(TeamManager) instead.
+     */
     public Team() {
         super();
+    }
+
+    public Team(TeamManager teamManager) {
+        super();
+        manager = teamManager;
         members = new ArrayList<>();
         questionSendingTime = LocalTime.of(9, 0);
     }

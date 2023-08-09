@@ -1,5 +1,7 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.util.List;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,10 +23,17 @@ public class TeamManager extends User {
 	@JoinColumn(name = "team_id")
 	private Team team;
 
+	/**
+	 * This constructor should never be used. Use TeamManager(List<HumanFactor>) instead.
+	 * This constructor cannot be removed as hibernate uses the default constructor to instantiate entities.
+	 */
 	public TeamManager() {
 		super();
-		team = new Team();
-		team.setManager(this);
+	}
+
+	public TeamManager(List<HumanFactor> humanFactors) {
+		super(humanFactors);
+		team = new Team(this);
 	}
 
 	public String getPassword() {

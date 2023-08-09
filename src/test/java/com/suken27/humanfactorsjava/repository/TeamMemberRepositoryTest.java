@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.TeamMember;
 
 import jakarta.transaction.Transactional;
@@ -22,8 +23,11 @@ public class TeamMemberRepositoryTest {
     @Autowired
     private TeamMemberRepository repository;
 
+    @Autowired
+    private HumanFactorFactory humanFactorFactory;
+
     private void createTeamMember(String email) {
-        TeamMember teamMember = new TeamMember();
+        TeamMember teamMember = new TeamMember(humanFactorFactory.createInstances());
         teamMember.setEmail(email);
         teamMember = repository.save(teamMember);
         assertNotNull(teamMember);

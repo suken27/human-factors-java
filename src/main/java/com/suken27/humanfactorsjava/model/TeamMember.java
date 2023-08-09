@@ -1,6 +1,7 @@
 package com.suken27.humanfactorsjava.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,8 +22,16 @@ public class TeamMember extends User {
     @ManyToOne(fetch = FetchType.LAZY)
     private Team team;
     
+    /**
+     * This constructor should never be used. Use TeamMember(List<HumanFactor>) instead.
+     * This constructor cannot be removed as hibernate uses the default constructor to instantiate entities.
+     */
     public TeamMember() {
         super();
+    }
+
+    public TeamMember(List<HumanFactor> humanFactors) {
+        super(humanFactors);
         deleted = false;
     }
 

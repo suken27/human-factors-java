@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
@@ -39,6 +40,9 @@ public class TeamController {
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
+    private HumanFactorFactory humanFactorFactory;
 
     @Autowired
     private ApiValidator validator;
@@ -67,7 +71,7 @@ public class TeamController {
         if(teamMember != null) {
             return ResponseEntity.badRequest().body(new MemberInAnotherTeamException(email));
         }
-        teamMember = new TeamMember();
+        teamMember = new TeamMember(humanFactorFactory.createInstances());
         teamMember.setEmail(email);
         teamMember.setTeam(team);
         team.addMember(teamMember);

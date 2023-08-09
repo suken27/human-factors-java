@@ -16,6 +16,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.model.TeamMember;
@@ -47,13 +48,16 @@ public class TeamControllerTest {
     TeamMemberRepository teamMemberRepository;
 
     @Autowired
+    HumanFactorFactory humanFactorFactory;
+
+    @Autowired
     MockMvc mockMvc;
 
     private static TeamManager teamManager;
 
     @BeforeAll
-    private static void createTestTeamManager(@Autowired TeamManagerRepository teamManagerRepository) {
-        teamManager = new TeamManager();
+    private static void createTestTeamManager(@Autowired TeamManagerRepository teamManagerRepository, @Autowired HumanFactorFactory humanFactorFactory) {
+        teamManager = new TeamManager(humanFactorFactory.createInstances());
         teamManager.setEmail(TEST_TEAM_MANAGER_EMAIL);
         teamManager.setPassword(TEST_TEAM_MANAGER_PASSWORD);
         teamManagerRepository.save(teamManager);
@@ -75,7 +79,7 @@ public class TeamControllerTest {
     @WithMockUser(username=TEST_TEAM_MANAGER_EMAIL, roles={"USER"})
     @Transactional
     public void testRemoveTeamMember() throws Exception {
-        TeamMember teamMember = new TeamMember();
+        TeamMember teamMember = new TeamMember(humanFactorFactory.createInstances());
         teamMember.setEmail(TEST_TEAM_MEMBER_EMAIL);
         teamManager.getTeam().addMember(teamMember);
         teamRepository.save(teamManager.getTeam());

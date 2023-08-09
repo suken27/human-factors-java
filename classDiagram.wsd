@@ -9,6 +9,10 @@ class HumanFactorType {
     String description
     boolean onlyOnce
 }
+class HumanFactorFactory {
+    List<HumanFactor> createInstances()
+}
+enum Cluster
 class Action {
     
 }
@@ -27,6 +31,7 @@ class QuestionType {
     boolean onlyForManagement
     boolean isNegative
 }
+enum TypeOfAnswer
 abstract class User
 class Answer {
     LocalDateTime creationTime
@@ -48,6 +53,7 @@ Question -> QuestionType
 HumanFactor "1..*" -- "0..*" Action
 HumanFactor --> HumanFactor : depends on
 HumanFactor -> HumanFactorType
+Cluster "1" <-- HumanFactorType
 User <|-- TeamMember
 User <|-- TeamManager
 TeamMember "0..*" --* Team
@@ -56,6 +62,9 @@ ActionType -> BibliographicSource
 Action -> ActionType
 HumanFactorType --> "0..*" BibliographicSource
 HumanFactorType -> HumanFactorType : depends on
+HumanFactorType --> ActionType
 QuestionType <--* HumanFactorType
+TypeOfAnswer "1" <-- QuestionType
 User *-> HumanFactor
+HumanFactorFactory *--> HumanFactorType
 @enduml

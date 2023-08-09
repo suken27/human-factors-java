@@ -1,11 +1,13 @@
 package com.suken27.humanfactorsjava.model;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -14,12 +16,24 @@ public class Question {
     @Id
     @GeneratedValue
     private Long id;
-    @OneToMany
-    private Deque<Answer> answers;
+    // This list should be a stack, but hibernate does not persist stacks. This list should be used as Last Input First Output.
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Answer> answers;
+    @ManyToOne
+    private QuestionType type;
 
+    /**
+     * This constructor should never be used. Use Question(QuestionType) instead.
+	 * This constructor cannot be removed as hibernate uses the default constructor to instantiate entities.
+     */
     public Question() {
         super();
-        answers = new ArrayDeque<>();
+    }
+
+    public Question(QuestionType questionType) {
+        super();
+        answers = new ArrayList<>();
+        type = questionType;
     }
 
     public Long getId() {
@@ -30,12 +44,20 @@ public class Question {
         this.id = id;
     }
 
-    public Deque<Answer> getAnswers() {
+    public List<Answer> getAnswers() {
         return answers;
     }
 
-    public void setAnswers(Deque<Answer> answers) {
+    public void setAnswers(List<Answer> answers) {
         this.answers = answers;
+    }
+
+    public QuestionType getType() {
+        return type;
+    }
+
+    public void setType(QuestionType type) {
+        this.type = type;
     }
 
     @Override

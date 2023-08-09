@@ -15,6 +15,7 @@ public class QuestionType {
     private String questionText;
     private boolean onlyForManagement;
     private boolean isNegative;
+    private TypeOfAnswer typeOfAnswer;
 
     public QuestionType() {
         super();
@@ -50,6 +51,22 @@ public class QuestionType {
 
     public void setNegative(boolean isNegative) {
         this.isNegative = isNegative;
+    }
+
+    public TypeOfAnswer getTypeOfAnswer() {
+        return typeOfAnswer;
+    }
+
+    public void setTypeOfAnswer(TypeOfAnswer typeOfAnswer) {
+        this.typeOfAnswer = typeOfAnswer;
+    }
+
+    /**
+     * Creates an instance of question with this type as intrinsic state.
+     * @return Question (extrinsic state) with this object as intrinsic state.
+     */
+    public Question createInstance() {
+        return new Question(this);
     }
 
     @Override

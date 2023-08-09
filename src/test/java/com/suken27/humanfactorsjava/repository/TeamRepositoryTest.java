@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 
@@ -28,8 +29,8 @@ public class TeamRepositoryTest {
     private static TeamManager teamManager;
 
     @BeforeAll
-    private static void createTestTeamManager(@Autowired TeamManagerRepository teamManagerRepository) {
-        teamManager = new TeamManager();
+    private static void createTestTeamManager(@Autowired TeamManagerRepository teamManagerRepository, @Autowired HumanFactorFactory humanFactorFactory) {
+        teamManager = new TeamManager(humanFactorFactory.createInstances());
         teamManager.setEmail(TEST_TEAM_MANAGER_EMAIL);
         teamManager.setPassword(TEST_TEAM_MANAGER_PASSWORD);
         teamManager = teamManagerRepository.save(teamManager);

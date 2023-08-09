@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -21,12 +22,14 @@ public class HumanFactorType {
     private String description;
     private boolean onlyOnce;
     private Cluster cluster;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<BibliographicSource> bibliographicSource;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<QuestionType> questionTypes;
     @ManyToMany(fetch = FetchType.EAGER)
     private List<HumanFactorType> dependsOn;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<ActionType> actionTypes;
 
     public HumanFactorType() {
         super();
@@ -94,6 +97,36 @@ public class HumanFactorType {
 
     public void setDependsOn(List<HumanFactorType> dependsOn) {
         this.dependsOn = dependsOn;
+    }
+
+    public List<ActionType> getActionTypes() {
+        return actionTypes;
+    }
+
+    public void setActionTypes(List<ActionType> actionTypes) {
+        this.actionTypes = actionTypes;
+    }
+
+    /**
+     * Creates an instance of human factor with this type as intrinsic state.
+     * It also creates the instances for the Questions and Actions associated.
+     * @return Human factor (extrinsic state) with this object as intrinsic state.
+     * @see Question
+     * @see Answer
+     */
+    public HumanFactor createInstance() {
+        HumanFactor humanFactor = new HumanFactor(this);
+        ArrayList<Action> actions = new ArrayList<>();
+        for (ActionType actionType : actionTypes) {
+            actions.add(actionType.createInstance());
+        }
+        humanFactor.setActions(actions);
+        ArrayList<Question> questions = new ArrayList<>();
+        for (QuestionType questionType : questionTypes) {
+            questions.add(questionType.createInstance());
+        }
+        humanFactor.setQuestions(questions);
+        return humanFactor;
     }
 
     @Override

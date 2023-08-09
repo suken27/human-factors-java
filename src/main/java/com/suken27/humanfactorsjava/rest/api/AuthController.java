@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.rest.dto.AuthDto;
@@ -43,6 +44,9 @@ public class AuthController {
 
     @Autowired
     private ApiValidator validator;
+
+    @Autowired
+    private HumanFactorFactory humanFactorFactory;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
@@ -80,7 +84,7 @@ public class AuthController {
         if(repository.findByEmail(authDto.getEmail()) != null) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(authDto.getEmail()));
         }
-        TeamManager entity = new TeamManager();
+        TeamManager entity = new TeamManager(humanFactorFactory.createInstances());
         entity.setEmail(authDto.getEmail());
         entity.setPassword(passwordEncoder.encode(authDto.getPassword()));
         repository.save(entity);
