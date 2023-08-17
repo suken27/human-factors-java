@@ -86,12 +86,12 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.slack.api/bolt -->
 		<dependency>
-  			<groupId>org.modelmapper</groupId>
-  			<artifactId>modelmapper</artifactId>
-  			<version>3.0.0</version>
+			<groupId>com.slack.api</groupId>
+			<artifactId>bolt-jakarta-servlet</artifactId>
+			<version>1.30.0</version>
 		</dependency>
-		
  	</dependencies>
 
 	<build>

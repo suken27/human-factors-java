@@ -31,4 +31,12 @@ public class HumanFactorFactory {
         return humanFactors;
     }
 
+    public List<TeamHumanFactor> createTeamInstances() {
+        List<TeamHumanFactor> humanFactors = new ArrayList<>();
+        for (HumanFactorType humanFactorType : getAll()) {
+            humanFactors.add(humanFactorType.createTeamInstance());
+        }
+        return humanFactors;
+    }
+
 }

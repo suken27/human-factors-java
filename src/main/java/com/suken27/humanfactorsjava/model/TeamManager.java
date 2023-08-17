@@ -1,7 +1,5 @@
 package com.suken27.humanfactorsjava.model;
 
-import java.util.List;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,9 +29,9 @@ public class TeamManager extends User {
 		super();
 	}
 
-	public TeamManager(List<HumanFactor> humanFactors) {
-		super(humanFactors);
-		team = new Team(this);
+	public TeamManager(HumanFactorFactory humanFactorFactory) {
+		super(humanFactorFactory.createInstances());
+		team = new Team(this, humanFactorFactory.createTeamInstances());
 	}
 
 	public String getPassword() {

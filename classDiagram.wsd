@@ -2,6 +2,8 @@
 class HumanFactor {
     boolean : isFullyAnswered()
     double : getLatestAverageScore()
+}
+class TeamHumanFactor {
     pendiente : getImpactOrRelevance()
 }
 class HumanFactorType {
@@ -48,22 +50,24 @@ class Team {
 }
 
 Answer "0..*" <--*  Question
-Question "1..*" <-* HumanFactor
+Question "1..*" <--* HumanFactor
 Question -> QuestionType
-HumanFactor "1..*" -- "0..*" Action
+TeamHumanFactor "1..*" - "0..*" Action
+HumanFactorType <-- TeamHumanFactor
 HumanFactor --> HumanFactor : depends on
 HumanFactor -> HumanFactorType
-Cluster "1" <-- HumanFactorType
+HumanFactorType -> "1" Cluster
 User <|-- TeamMember
 User <|-- TeamManager
 TeamMember "0..*" --* Team
 TeamManager "1" -- "1" Team
+Team *-> TeamHumanFactor
 ActionType -> BibliographicSource
 Action -> ActionType
 HumanFactorType --> "0..*" BibliographicSource
 HumanFactorType -> HumanFactorType : depends on
-HumanFactorType --> ActionType
 QuestionType <--* HumanFactorType
+HumanFactorType *--> ActionType
 TypeOfAnswer "1" <-- QuestionType
 User *-> HumanFactor
 HumanFactorFactory *--> HumanFactorType

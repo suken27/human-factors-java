@@ -49,42 +49,44 @@ public class AuthController {
     private HumanFactorFactory humanFactorFactory;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    
+
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody AuthDto authDto) {
-        if(authDto == null || authDto.getEmail() == null || authDto.getPassword() == null) {
+        if (authDto == null || authDto.getEmail() == null || authDto.getPassword() == null) {
             return ResponseEntity.badRequest().body("Empty email or password.");
         }
         TeamManager user = repository.findByEmail(authDto.getEmail());
-        if(user == null || !passwordEncoder.matches(authDto.getPassword(), user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(authDto.getPassword(), user.getPassword())) {
             return ResponseEntity.badRequest().body("User not found, or password does not match.");
         }
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String role = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList()).get(0);
+        String role = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+                .collect(Collectors.toList()).get(0);
 
         return ResponseEntity.ok(new JwtResponseDto(jwt, userDetails.getUsername(), role));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Validated @RequestBody AuthDto authDto) {
-        if(authDto == null) {
+        if (authDto == null) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(null));
         }
-        if(!validator.isValidEmail(authDto.getEmail())) {
+        if (!validator.isValidEmail(authDto.getEmail())) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(null));
         }
-        if(!validator.isValidPassword(authDto.getPassword())) {
+        if (!validator.isValidPassword(authDto.getPassword())) {
             return ResponseEntity.badRequest().body(new IncorrectPasswordFormatException());
         }
-        if(repository.findByEmail(authDto.getEmail()) != null) {
+        if (repository.findByEmail(authDto.getEmail()) != null) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(authDto.getEmail()));
         }
-        TeamManager entity = new TeamManager(humanFactorFactory.createInstances());
+        TeamManager entity = new TeamManager(humanFactorFactory);
         entity.setEmail(authDto.getEmail());
         entity.setPassword(passwordEncoder.encode(authDto.getPassword()));
         repository.save(entity);

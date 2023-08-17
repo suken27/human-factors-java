@@ -51,7 +51,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("/login", "/signup").permitAll().anyRequest().authenticated());
+                        .requestMatchers("/login", "/signup", "/slack/**").permitAll().anyRequest().authenticated());
         http.authenticationProvider(daoAuthenticationProvider);
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         http.cors(Customizer.withDefaults());

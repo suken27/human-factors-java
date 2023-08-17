@@ -2,35 +2,23 @@ package com.suken27.humanfactorsjava.model;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 
 @Entity
-public class HumanFactor {
+public class TeamHumanFactor {
     
     @Id
-    @GeneratedValue
     private Long id;
     @ManyToOne
     private HumanFactorType type;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Question> questions;
+    @ManyToMany
+    private List<Action> actions;
 
-    /**
-     * This constructor should never be used. Use HumanFactor(HumanFactorType) instead.
-	 * This constructor cannot be removed as hibernate uses the default constructor to instantiate entities.
-     */
-    public HumanFactor() {
-        super();
-    }
-
-    public HumanFactor(HumanFactorType humanFactorType) {
-        super();
-        type = humanFactorType;
+    public TeamHumanFactor(HumanFactorType type) {
+        this.type = type;
     }
 
     public Long getId() {
@@ -49,12 +37,12 @@ public class HumanFactor {
         this.type = type;
     }
 
-    public List<Question> getQuestions() {
-        return questions;
+    public List<Action> getActions() {
+        return actions;
     }
 
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
+    public void setActions(List<Action> actions) {
+        this.actions = actions;
     }
 
     @Override
@@ -73,7 +61,7 @@ public class HumanFactor {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        HumanFactor other = (HumanFactor) obj;
+        TeamHumanFactor other = (TeamHumanFactor) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
@@ -84,9 +72,7 @@ public class HumanFactor {
 
     @Override
     public String toString() {
-        return "HumanFactor [id=" + id + "]";
+        return "TeamHumanFactor [id=" + id + "]";
     }
-
-        
 
 }

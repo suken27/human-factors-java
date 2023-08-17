@@ -57,7 +57,7 @@ public class TeamControllerTest {
 
     @BeforeAll
     private static void createTestTeamManager(@Autowired TeamManagerRepository teamManagerRepository, @Autowired HumanFactorFactory humanFactorFactory) {
-        teamManager = new TeamManager(humanFactorFactory.createInstances());
+        teamManager = new TeamManager(humanFactorFactory);
         teamManager.setEmail(TEST_TEAM_MANAGER_EMAIL);
         teamManager.setPassword(TEST_TEAM_MANAGER_PASSWORD);
         teamManagerRepository.save(teamManager);

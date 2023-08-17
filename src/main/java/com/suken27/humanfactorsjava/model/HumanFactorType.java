@@ -116,16 +116,21 @@ public class HumanFactorType {
      */
     public HumanFactor createInstance() {
         HumanFactor humanFactor = new HumanFactor(this);
-        ArrayList<Action> actions = new ArrayList<>();
-        for (ActionType actionType : actionTypes) {
-            actions.add(actionType.createInstance());
-        }
-        humanFactor.setActions(actions);
         ArrayList<Question> questions = new ArrayList<>();
         for (QuestionType questionType : questionTypes) {
             questions.add(questionType.createInstance());
         }
         humanFactor.setQuestions(questions);
+        return humanFactor;
+    }
+
+    public TeamHumanFactor createTeamInstance() {
+        TeamHumanFactor humanFactor = new TeamHumanFactor(this);
+        ArrayList<Action> actions = new ArrayList<>();
+        for (ActionType actionType : actionTypes) {
+            actions.add(actionType.createInstance());
+        }
+        humanFactor.setActions(actions);
         return humanFactor;
     }
 

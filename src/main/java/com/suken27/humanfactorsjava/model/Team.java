@@ -29,7 +29,8 @@ public class Team {
         cascade = CascadeType.ALL
     )
     private List<TeamMember> members;
-
+    @OneToMany
+    private List<TeamHumanFactor> humanFactors;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
 
@@ -40,11 +41,12 @@ public class Team {
         super();
     }
 
-    public Team(TeamManager teamManager) {
+    public Team(TeamManager teamManager, List<TeamHumanFactor> humanFactors) {
         super();
         manager = teamManager;
         members = new ArrayList<>();
         questionSendingTime = LocalTime.of(9, 0);
+        this.humanFactors = humanFactors;
     }
 
     public Long getId() {
