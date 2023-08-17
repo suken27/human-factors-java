@@ -13,8 +13,8 @@ public class SlackApp {
     public App initSlackApp() {
         AppConfig config = new AppConfig();
         //TODO: Move this to a config file
-        config.setSigningSecret("c37275215a1b02f8950d2d6951356771");
-        config.setSingleTeamBotToken("xoxb-2452501990086-5742975164999-gBHFadxvv3y2q2o5KQ4GZMIo");
+        config.setSigningSecret("4fafae3ae6d61272b03bc576d395f3b8");
+        config.setSingleTeamBotToken("xoxb-2452501990086-5742975164999-XFXfToNlDKGi9RSpHA56vskR");
         App app = new App(config);
         app.command("/hello", (req, ctx) -> ctx.ack("What's up?"));
         return app;
