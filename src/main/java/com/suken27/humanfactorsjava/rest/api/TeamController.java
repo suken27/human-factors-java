@@ -17,19 +17,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
+import com.suken27.humanfactorsjava.model.controller.ModelController;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
 import com.suken27.humanfactorsjava.rest.dto.TeamDto;
 import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectTimeFormatException;
-import com.suken27.humanfactorsjava.rest.exception.MemberAlreadyInTeamException;
-import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
-import com.suken27.humanfactorsjava.rest.exception.TeamMemberNotFoundException;
-import com.suken27.humanfactorsjava.rest.exception.UserNotInTeamException;
 import com.suken27.humanfactorsjava.rest.util.ApiValidator;
 
 @RestController
@@ -42,7 +38,7 @@ public class TeamController {
     private TeamMemberRepository teamMemberRepository;
 
     @Autowired
-    private HumanFactorFactory humanFactorFactory;
+    private ModelController modelController;
 
     @Autowired
     private ApiValidator validator;
@@ -52,7 +48,7 @@ public class TeamController {
     @GetMapping("/teams")
     public ResponseEntity<?> getTeam() {
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+        Team team = modelController.getTeam(teamManagerEmail);
         return ResponseEntity.ok().body(new TeamDto(team));
     }
 
@@ -62,20 +58,7 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
-        // Team should not be null as every team manager is created with an empty team, so no check should be required
-        if(team.isMember(email)) {
-            return ResponseEntity.badRequest().body(new MemberAlreadyInTeamException(email));
-        }
-        TeamMember teamMember = teamMemberRepository.findByEmail(email);
-        if(teamMember != null) {
-            return ResponseEntity.badRequest().body(new MemberInAnotherTeamException(email));
-        }
-        teamMember = new TeamMember(humanFactorFactory.createInstances());
-        teamMember.setEmail(email);
-        teamMember.setTeam(team);
-        team.addMember(teamMember);
-        team = teamRepository.save(team);
+        Team team = modelController.addTeamMember(teamManagerEmail, email);
         return ResponseEntity.ok().body(toDto(team.getMembers()));
     }
 
@@ -85,19 +68,7 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
-        // Team should not be null as every team manager is created with an empty team, so no check should be required
-        if(!team.isMember(email)) {
-            return ResponseEntity.badRequest().body(new UserNotInTeamException(email));
-        }
-        // At this point the user should exist, this is a double check just in case
-        TeamMember teamMember = teamMemberRepository.findByEmail(email);
-        if(teamMember == null) {
-            return ResponseEntity.badRequest().body(new TeamMemberNotFoundException(email));
-        }
-        team.removeMember(teamMember);
-        team = teamRepository.save(team);
-        teamMemberRepository.save(teamMember);
+        Team team = modelController.removeTeamMember(teamManagerEmail, email);
         return ResponseEntity.ok().body(toDto(team.getMembers()));
     }
 
@@ -108,9 +79,7 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new IncorrectTimeFormatException(questionSendingTime));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
-        team.setQuestionSendingTime(localTime);
-        team = teamRepository.save(team);
+        Team team = modelController.modifyQuestionSendingTime(teamManagerEmail, localTime);
         return ResponseEntity.ok().body(new TeamDto(team));
     }
 

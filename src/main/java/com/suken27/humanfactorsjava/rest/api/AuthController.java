@@ -11,15 +11,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.suken27.humanfactorsjava.model.HumanFactorFactory;
-import com.suken27.humanfactorsjava.model.TeamManager;
-import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
+import com.suken27.humanfactorsjava.model.controller.ModelController;
 import com.suken27.humanfactorsjava.rest.dto.AuthDto;
 import com.suken27.humanfactorsjava.rest.dto.JwtResponseDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
@@ -34,19 +31,13 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private TeamManagerRepository repository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
     private ApiValidator validator;
 
     @Autowired
-    private HumanFactorFactory humanFactorFactory;
+    private ModelController modelController;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -55,10 +46,7 @@ public class AuthController {
         if (authDto == null || authDto.getEmail() == null || authDto.getPassword() == null) {
             return ResponseEntity.badRequest().body("Empty email or password.");
         }
-        TeamManager user = repository.findByEmail(authDto.getEmail());
-        if (user == null || !passwordEncoder.matches(authDto.getPassword(), user.getPassword())) {
-            return ResponseEntity.badRequest().body("User not found, or password does not match.");
-        }
+        modelController.checkUser(authDto.getEmail(), authDto.getPassword());
 
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
@@ -83,13 +71,7 @@ public class AuthController {
         if (!validator.isValidPassword(authDto.getPassword())) {
             return ResponseEntity.badRequest().body(new IncorrectPasswordFormatException());
         }
-        if (repository.findByEmail(authDto.getEmail()) != null) {
-            return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(authDto.getEmail()));
-        }
-        TeamManager entity = new TeamManager(humanFactorFactory);
-        entity.setEmail(authDto.getEmail());
-        entity.setPassword(passwordEncoder.encode(authDto.getPassword()));
-        repository.save(entity);
+        modelController.registerTeamManager(authDto.getEmail(), authDto.getPassword());
         return ResponseEntity.ok("User registered successfully.");
     }
 

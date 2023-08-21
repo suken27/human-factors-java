@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -19,6 +20,7 @@ public class HumanFactor {
     private HumanFactorType type;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Question> questions;
+    private LocalDate lastQuestionAnswered;
 
     /**
      * This constructor should never be used. Use HumanFactor(HumanFactorType) instead.
@@ -55,6 +57,31 @@ public class HumanFactor {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
+    }
+
+    public LocalDate getLastQuestionAnswered() {
+        return lastQuestionAnswered;
+    }
+
+    public void setLastQuestionAnswered(LocalDate lastQuestionAnswered) {
+        this.lastQuestionAnswered = lastQuestionAnswered;
+    }
+
+    public long oldestQuestionDaysSinceLastAnswer() {
+        return getOldestQuestion().daysSinceLastAnswer();
+    }
+
+    public Question getOldestQuestion() {
+        Question oldestQuestion = questions.get(0);
+        for (Question question : questions) {
+            if(question.getLastAnswerDateTime() == null) {
+                return question;
+            }
+            if(question.getLastAnswerDateTime().isBefore(oldestQuestion.getLastAnswerDateTime())) {
+                oldestQuestion = question;
+            }
+        }
+        return oldestQuestion;
     }
 
     @Override

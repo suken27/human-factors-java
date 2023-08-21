@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -29,7 +30,8 @@ public abstract class User {
 
     /**
      * This constructor should never be used. Use User(List<HumanFactor) instead.
-     * This constructor cannot be removed as hibernate uses the default constructor to instantiate entities.
+     * This constructor cannot be removed as hibernate uses the default constructor
+     * to instantiate entities.
      */
     protected User() {
         super();
@@ -62,6 +64,42 @@ public abstract class User {
 
     public void setHumanFactors(List<HumanFactor> humanFactors) {
         this.humanFactors = humanFactors;
+    }
+
+    /**
+     * Returns a random set of questions addressing some the less frequently
+     * measured human factors. The questions are selected through a weighted random
+     * selection (the less frequently measured human factors have a higher chance of
+     * being selected).
+     * 
+     * @param numberOfQuestions Amount of questions to be returned.
+     * @return A list of questions.
+     * @see Question
+     * @see HumanFactor
+     */
+    public List<Question> launchQuestions(int numberOfQuestions) {
+        List<Question> launchQuestions = new ArrayList<>();
+        List<Question> questions = new ArrayList<>();
+        long totalWeight = 0;
+        for (HumanFactor humanFactor : humanFactors) {
+            questions.add(humanFactor.getOldestQuestion());
+            // The +1 is to avoid 0 total weight if the questions are launched the same day
+            // they are created.
+            totalWeight += humanFactor.oldestQuestionDaysSinceLastAnswer() + 1;
+        }
+        double random;
+        for (int i = 0; i < numberOfQuestions; i++) {
+            random = Math.random() * totalWeight;
+            for (Question question : questions) {
+                random -= question.daysSinceLastAnswer() + 1;
+                if (random <= 0.0d) {
+                    launchQuestions.add(question);
+                    questions.remove(question);
+                    break;
+                }
+            }
+        }
+        return launchQuestions;
     }
 
     @Override

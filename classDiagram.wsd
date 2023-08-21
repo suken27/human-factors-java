@@ -1,15 +1,17 @@
 @startuml
 class HumanFactor {
-    boolean : isFullyAnswered()
-    double : getLatestAverageScore()
+    boolean isFullyAnswered()
+    double getLatestAverageScore()
 }
 class TeamHumanFactor {
-    pendiente : getImpactOrRelevance()
+    pendiente getImpactOrRelevance()
 }
 class HumanFactorType {
     String title
     String description
     boolean onlyOnce
+
+    HumanFactor : createInstance()
 }
 class HumanFactorFactory {
     List<HumanFactor> createInstances()
@@ -21,17 +23,20 @@ class Action {
 class ActionType {
     String title
     String description
+    Action : createInstance()
 }
 class Question {
-    boolean : isAnswered()
-    double : getLatestScore()
-    void : addAnswer(Answer answer)
-    Answer : getLatestAnswer()
+    boolean isAnswered()
+    double getLatestScore()
+    void addAnswer(Answer answer)
+    Answer getLatestAnswer()
 }
 class QuestionType {
     String questionText
     boolean onlyForManagement
     boolean isNegative
+
+    Question createInstance()
 }
 enum TypeOfAnswer
 abstract class User

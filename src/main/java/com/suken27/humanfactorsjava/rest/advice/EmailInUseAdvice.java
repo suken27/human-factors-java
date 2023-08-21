@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.suken27.humanfactorsjava.rest.exception.EmailInUseException;
+import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
 
 @ControllerAdvice
 public class EmailInUseAdvice {

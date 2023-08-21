@@ -3,7 +3,9 @@ package com.suken27.humanfactorsjava.model;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -33,6 +35,7 @@ public class Team {
     private List<TeamHumanFactor> humanFactors;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
+    private int questionsPerDay;
 
     /**
      * This constructor should never be used. Use Team(TeamManager) instead.
@@ -46,6 +49,7 @@ public class Team {
         manager = teamManager;
         members = new ArrayList<>();
         questionSendingTime = LocalTime.of(9, 0);
+        questionsPerDay = 10;
         this.humanFactors = humanFactors;
     }
 
@@ -107,6 +111,16 @@ public class Team {
 
     public void setQuestionSendingTime(LocalTime questionSendingTime) {
         this.questionSendingTime = questionSendingTime;
+    }
+
+    public Map<User, List<Question>> launchQuestions() {
+        Map<User, List<Question>> questionMap = new HashMap<>();
+        List<User> teamUsers = new ArrayList<>(members);
+        teamUsers.add(manager);
+        for(User user : teamUsers) {
+            questionMap.put(user, user.launchQuestions(questionsPerDay));
+        }
+        return questionMap;
     }
 
     @Override

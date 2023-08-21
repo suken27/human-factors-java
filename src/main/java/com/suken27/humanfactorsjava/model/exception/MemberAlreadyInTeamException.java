@@ -1,4 +1,4 @@
-package com.suken27.humanfactorsjava.rest.exception;
+package com.suken27.humanfactorsjava.model.exception;
 
 public class MemberAlreadyInTeamException extends RuntimeException {
     
