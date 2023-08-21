@@ -31,7 +31,7 @@ public class Team {
         cascade = CascadeType.ALL
     )
     private List<TeamMember> members;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<TeamHumanFactor> humanFactors;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;

@@ -2,7 +2,9 @@ package com.suken27.humanfactorsjava.model;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -11,11 +13,19 @@ import jakarta.persistence.ManyToOne;
 public class TeamHumanFactor {
     
     @Id
+    @GeneratedValue
     private Long id;
     @ManyToOne
     private HumanFactorType type;
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Action> actions;
+
+    /**
+     * This constructor should never be used. Use TeamHumanFactor(HumanFactorType) instead.
+     */
+    public TeamHumanFactor() {
+        super();
+    }
 
     public TeamHumanFactor(HumanFactorType type) {
         this.type = type;
