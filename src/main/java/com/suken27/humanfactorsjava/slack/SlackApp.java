@@ -61,7 +61,7 @@ public class SlackApp {
         }
     }
 
-    @WebServlet("/slack/oauth_redirect")
+    @WebServlet("/slack/oauth")
     public class SlackOAuthRedirectController extends SlackOAuthAppServlet {
         public SlackOAuthRedirectController(App app) {
             super(app);
