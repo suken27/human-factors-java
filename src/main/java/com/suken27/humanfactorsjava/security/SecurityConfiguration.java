@@ -15,8 +15,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableMethodSecurity
@@ -45,13 +47,19 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
+        return new MvcRequestMatcher.Builder(introspector);
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationEntryPointJwt authenticationEntryPointJwt,
-            DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
+            DaoAuthenticationProvider daoAuthenticationProvider, MvcRequestMatcher.Builder mvc) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("/login", "/signup", "/slack/**").permitAll().anyRequest().authenticated());
+                .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers(mvc.pattern("/login"), mvc.pattern("/signup"), mvc.pattern("/slack/**"), mvc.pattern("/error**"))
+                        .permitAll().anyRequest().authenticated());
         http.authenticationProvider(daoAuthenticationProvider);
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         http.cors(Customizer.withDefaults());
@@ -68,7 +76,8 @@ public class SecurityConfiguration {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS");
+                registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE",
+                        "OPTIONS");
             }
         };
     }

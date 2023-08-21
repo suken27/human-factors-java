@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
-import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
-import com.suken27.humanfactorsjava.repository.TeamRepository;
 import com.suken27.humanfactorsjava.rest.dto.TeamDto;
 import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
@@ -30,12 +28,6 @@ import com.suken27.humanfactorsjava.rest.util.ApiValidator;
 
 @RestController
 public class TeamController {
-    
-    @Autowired
-    private TeamRepository teamRepository;
-
-    @Autowired
-    private TeamMemberRepository teamMemberRepository;
 
     @Autowired
     private ModelController modelController;
