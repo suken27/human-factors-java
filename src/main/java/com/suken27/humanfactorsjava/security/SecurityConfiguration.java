@@ -1,7 +1,5 @@
 package com.suken27.humanfactorsjava.security;
 
-//generate static import of antMatchers
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,7 +59,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(mvc.pattern("/login"), mvc.pattern("/signup"), mvc.pattern("/slack/**"), mvc.pattern("/error**"))
+                        .requestMatchers(mvc.pattern("/login"), mvc.pattern("/signup"), mvc.pattern("/error**"))
                         .permitAll().anyRequest().authenticated());
         http.authenticationProvider(daoAuthenticationProvider);
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

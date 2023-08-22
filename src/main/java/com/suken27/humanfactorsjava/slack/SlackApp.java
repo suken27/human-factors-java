@@ -10,9 +10,6 @@ import org.springframework.core.env.Environment;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.slack.api.bolt.jakarta_servlet.SlackOAuthAppServlet;
-
-import jakarta.servlet.annotation.WebServlet;
 
 @Configuration
 public class SlackApp {
@@ -20,12 +17,14 @@ public class SlackApp {
     @Bean
     public AppConfig loadOAuthConfig(Environment environment) {
         return AppConfig.builder()
+                .singleTeamBotToken(null)
                 .signingSecret(environment.getProperty("com.suken27.humanfactors.slack.signingSecret"))
                 .clientId(environment.getProperty("com.suken27.humanfactors.slack.clientID"))
                 .clientSecret(environment.getProperty("com.suken27.humanfactors.slack.clientSecret"))
                 .scope(environment.getProperty("com.suken27.humanfactors.slack.scope"))
                 .userScope(environment.getProperty("com.suken27.humanfactors.slack.userScope"))
-                .redirectUri(environment.getProperty("com.suken27.humanfactors.slack.redirectURI"))
+                .oauthInstallPath(environment.getProperty("com.suken27.humanfactors.slack.installPath"))
+                .oauthRedirectUriPath(environment.getProperty("com.suken27.humanfactors.slack.redirectURIPath"))
                 .build();
     }
 
@@ -43,13 +42,6 @@ public class SlackApp {
                                         button(b -> b.text(plainText(pt -> pt.emoji(true).text("Kin Khao")))
                                                 .value("v2")))))))));
         return app;
-    }
-
-    @WebServlet({ "/slack/install", "/slack/oauth_redirect" })
-    public class SlackOAuthRedirectController extends SlackOAuthAppServlet {
-        public SlackOAuthRedirectController(App app) {
-            super(app);
-        }
     }
 
 }
