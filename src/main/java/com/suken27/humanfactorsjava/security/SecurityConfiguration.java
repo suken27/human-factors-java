@@ -57,7 +57,7 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests((authorize) -> authorize
+                .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(mvc.pattern("/login"), mvc.pattern("/signup"), mvc.pattern("/slack/**"), mvc.pattern("/error**"))
                         .permitAll().anyRequest().authenticated());
         http.authenticationProvider(daoAuthenticationProvider);
