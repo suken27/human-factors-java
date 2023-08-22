@@ -20,15 +20,15 @@ public class SlackApp {
     @Bean
     public AppConfig loadOAuthConfig(Environment environment) {
         return AppConfig.builder()
-                .signingSecret(environment.getProperty("com.suken.humanfactors.slack.signingSecret"))
-                .clientId(environment.getProperty("com.suken.humanfactors.slack.clientID"))
-                .clientSecret(environment.getProperty("com.suken.humanfactors.slack.clientSecret"))
-                .scope(environment.getProperty("com.suken.humanfactors.slack.scope"))
-                .userScope(environment.getProperty("com.suken.humanfactors.slack.userScope"))
-                .redirectUri(environment.getProperty("com.suken.humanfactors.slack.redirectURI"))
+                .signingSecret(environment.getProperty("com.suken27.humanfactors.slack.signingSecret"))
+                .clientId(environment.getProperty("com.suken27.humanfactors.slack.clientID"))
+                .clientSecret(environment.getProperty("com.suken27.humanfactors.slack.clientSecret"))
+                .scope(environment.getProperty("com.suken27.humanfactors.slack.scope"))
+                .userScope(environment.getProperty("com.suken27.humanfactors.slack.userScope"))
+                .redirectUri(environment.getProperty("com.suken27.humanfactors.slack.redirectURI"))
                 .oauthRedirectUriPath(environment.getProperty("com.suken27.humanfactors.slack.redirectURIPath"))
-                .oauthCompletionUrl(environment.getProperty("com.suken.humanfactors.slack.oauthCompletionURL"))
-                .oauthCancellationUrl(environment.getProperty("com.suken.humanfactors.slack.oauthCancellationURL"))
+                .oauthCompletionUrl(environment.getProperty("com.suken27.humanfactors.slack.oauthCompletionURL"))
+                .oauthCancellationUrl(environment.getProperty("com.suken27.humanfactors.slack.oauthCancellationURL"))
                 .build();
     }
 
