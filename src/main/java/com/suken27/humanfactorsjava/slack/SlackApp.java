@@ -26,9 +26,6 @@ public class SlackApp {
                 .scope(environment.getProperty("com.suken27.humanfactors.slack.scope"))
                 .userScope(environment.getProperty("com.suken27.humanfactors.slack.userScope"))
                 .redirectUri(environment.getProperty("com.suken27.humanfactors.slack.redirectURI"))
-                .oauthRedirectUriPath(environment.getProperty("com.suken27.humanfactors.slack.redirectURIPath"))
-                .oauthCompletionUrl(environment.getProperty("com.suken27.humanfactors.slack.oauthCompletionURL"))
-                .oauthCancellationUrl(environment.getProperty("com.suken27.humanfactors.slack.oauthCancellationURL"))
                 .build();
     }
 
@@ -48,7 +45,7 @@ public class SlackApp {
         return app;
     }
 
-    @WebServlet({ "/slack/install", "/slack/oauth" })
+    @WebServlet({ "/slack/install", "/slack/oauth_redirect" })
     public class SlackOAuthRedirectController extends SlackOAuthAppServlet {
         public SlackOAuthRedirectController(App app) {
             super(app);
