@@ -26,6 +26,7 @@ public class SlackApp {
                 .scope(environment.getProperty("com.suken.humanfactors.slack.scope"))
                 .userScope(environment.getProperty("com.suken.humanfactors.slack.userScope"))
                 .redirectUri(environment.getProperty("com.suken.humanfactors.slack.redirectURI"))
+                .oauthRedirectUriPath(environment.getProperty("com.suken27.humanfactors.slack.redirectURIPath"))
                 .oauthCompletionUrl(environment.getProperty("com.suken.humanfactors.slack.oauthCompletionURL"))
                 .oauthCancellationUrl(environment.getProperty("com.suken.humanfactors.slack.oauthCancellationURL"))
                 .build();
