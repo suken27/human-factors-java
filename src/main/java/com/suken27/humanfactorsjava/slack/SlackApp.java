@@ -3,6 +3,7 @@ package com.suken27.humanfactorsjava.slack;
 import static com.slack.api.model.block.Blocks.*;
 import static com.slack.api.model.block.composition.BlockCompositions.*;
 import static com.slack.api.model.block.element.BlockElements.*;
+import static com.slack.api.model.view.Views.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,9 @@ import org.springframework.core.env.Environment;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
+import com.slack.api.methods.response.views.ViewsPublishResponse;
+import com.slack.api.model.event.AppHomeOpenedEvent;
+import com.slack.api.model.view.View;
 
 @Configuration
 public class SlackApp {
@@ -31,6 +35,31 @@ public class SlackApp {
     @Bean
     public App initSlackApp(AppConfig config) {
         App app = new App(config).asOAuthApp(true);
+        // TODO: Command that adds a new member to the team checking the email of the user
+        // to assess it is a team manager or not
+        app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
+                // Build a Home tab view
+                View appHomeView = view(view -> view
+                        .type("home")
+                        .blocks(asBlocks(
+                                section(section -> section.text(markdownText(mt -> mt.text("*Welcome to your _App's Home_* :tada:"))))
+                        ))
+                );
+                // Update the App Home for the given user
+                if(payload.getEvent().getView() == null) {
+                        ViewsPublishResponse res = ctx.client().viewsPublish(r -> r
+                                .userId(payload.getEvent().getUser())
+                                .view(appHomeView)        
+                        );
+                } else {
+                        ViewsPublishResponse res = ctx.client().viewsPublish(r -> r
+                                .userId(payload.getEvent().getUser())
+                                .hash(payload.getEvent().getView().getHash())
+                                .view(appHomeView)        
+                        );
+                }
+                return ctx.ack();
+        });
         app.command("/hello", (req, ctx) -> ctx.ack(r -> r.text("What's up?")
                 .blocks(asBlocks(
                         section(section -> section.text(markdownText("*Please select a restaurant:*"))),
