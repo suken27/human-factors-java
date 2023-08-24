@@ -1,5 +1,6 @@
 package com.suken27.humanfactorsjava.rest.api;
 
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.slack.api.methods.SlackApiException;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
@@ -25,6 +27,7 @@ import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectTimeFormatException;
 import com.suken27.humanfactorsjava.rest.util.ApiValidator;
+import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
 
 @RestController
 public class TeamController {
@@ -45,7 +48,7 @@ public class TeamController {
     }
 
     @PostMapping("/teams")
-    public ResponseEntity<?> addTeamMember(@RequestBody String email) {
+    public ResponseEntity<?> addTeamMember(@RequestBody String email) throws UserNotFoundInWorkspaceException, SlackApiException, IOException {
         if(email == null || !validator.isValidEmail(email)) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
