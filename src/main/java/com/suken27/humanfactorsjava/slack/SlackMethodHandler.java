@@ -23,43 +23,41 @@ public class SlackMethodHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SlackMethodHandler.class);
 
-    public String retrieveUserId(String email, String botToken) {
+    public String retrieveUserId(String email, String botToken) throws UserNotFoundInWorkspaceException, SlackApiException, IOException {
         User user = usersStoreByEmail.get(email);
         if (user == null) {
             fetchUsers(botToken);
             user = usersStoreByEmail.get(email);
         }
-        if(user == null) {
+        if (user == null) {
             throw new UserNotFoundInWorkspaceException(email);
         }
         return user.getId();
     }
 
-    public String retrieveUserEmail(String id, String botToken) {
+    public String retrieveUserEmail(String id, String botToken)
+            throws UserNotFoundInWorkspaceException, SlackApiException, IOException {
         User user = usersStoreById.get(id);
         if (user == null) {
             fetchUsers(botToken);
             user = usersStoreById.get(id);
         }
-        if(user == null) {
+        if (user == null) {
             throw new UserNotFoundInWorkspaceException(id);
         }
         return user.getProfile().getEmail();
     }
 
-    private void fetchUsers(String botToken) {
+    private void fetchUsers(String botToken) throws SlackApiException, IOException {
         MethodsClient client = Slack.getInstance().methods();
-        try {
-            // Call the users.list method using the built-in WebClient
-            UsersListResponse result = client.usersList(r -> r
+        // Call the users.list method using the built-in WebClient
+        UsersListResponse result = client.usersList(r -> r
                 .token(botToken));
-            for (User user : result.getMembers()) {
-                usersStoreById.put(user.getId(), user);
-                usersStoreByEmail.put(user.getProfile().getEmail(), user);
-            }
-        } catch (IOException | SlackApiException e) {
-            logger.error("Error retrieving all users in workspace from slack.", e);
+        for (User user : result.getMembers()) {
+            usersStoreById.put(user.getId(), user);
+            usersStoreByEmail.put(user.getProfile().getEmail(), user);
         }
+
     }
 
 }

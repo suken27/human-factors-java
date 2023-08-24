@@ -1,11 +1,13 @@
 package com.suken27.humanfactorsjava.model.controller;
 
+import java.io.IOException;
 import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.slack.api.methods.SlackApiException;
 import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
@@ -54,7 +56,7 @@ public class ModelController {
         }
     }
 
-    public Team checkTeamManager(String id, String slackBotToken) throws TeamManagerNotFoundException, UserNotFoundInWorkspaceException {
+    public Team checkTeamManager(String id, String slackBotToken) throws TeamManagerNotFoundException, UserNotFoundInWorkspaceException, SlackApiException, IOException {
         String email = slackMethodHandler.retrieveUserEmail(id, slackBotToken);
         Team team = teamRepository.findByTeamManagerEmail(email);
         if (team == null) {
@@ -79,7 +81,7 @@ public class ModelController {
         return teamRepository.findByTeamManagerEmail(teamManagerEmail);
     }
 
-    public Team addTeamMember(String teamManagerEmail, String email) {
+    public Team addTeamMember(String teamManagerEmail, String email) throws UserNotFoundInWorkspaceException, SlackApiException, IOException {
         //TODO: Add checks for no integration with Slack before adding team members
         //TODO: Add checks for adding a team member with an email not included in Slack
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);

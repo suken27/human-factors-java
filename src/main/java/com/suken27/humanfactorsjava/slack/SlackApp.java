@@ -16,6 +16,7 @@ import org.springframework.core.env.Environment;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
+import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.views.ViewsPublishResponse;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
@@ -25,6 +26,8 @@ import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
+
+import io.jsonwebtoken.io.IOException;
 
 @Configuration
 public class SlackApp {
@@ -51,18 +54,24 @@ public class SlackApp {
                 App app = new App(config).asOAuthApp(true);
                 app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
                         AppHomeOpenedEvent event = payload.getEvent();
-                        Team team;
+                        Team team = null;
+                        List<LayoutBlock> blocks = new ArrayList<>();
                         try {
                                 team = modelController.checkTeamManager(event.getUser(), ctx.getBotToken());
                         } catch (TeamManagerNotFoundException e) {
                                 logger.debug("Slack user with id {} tried to access team without being a TeamManager", event.getUser());
-                                team = null;
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*You are not a team manager* :skull_and_crossbones:")))));
                         } catch (UserNotFoundInWorkspaceException e) {
                                 // This is really improbable, but we should handle it anyway
-                                logger.error("Slack user with id {} not found in workspace", event.getUser());
-                                team = null;
+                                logger.error("Slack user with id {} not found in workspace", event.getUser(), e);
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*Unexpected error: Couldn't find the current user in the workspace* :warning:")))));
+                        } catch (SlackApiException | IOException e) {
+                                logger.error("Error ocurred when using the SlackApi", e);
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
                         }
-                        List<LayoutBlock> blocks = new ArrayList<>();
                         if(team != null) {
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                 "*You are a team manager* :tada:")))));
@@ -70,9 +79,6 @@ public class SlackApp {
                                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                         member.getSlackId() + " is a team member.")))));
                                 }
-                        } else {
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*You are not a team manager* :skull_and_crossbones:")))));
                         }
 
                         // Build a Home tab view
