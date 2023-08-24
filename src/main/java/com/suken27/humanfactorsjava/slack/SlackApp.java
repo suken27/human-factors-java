@@ -5,12 +5,15 @@ import static com.slack.api.model.block.composition.BlockCompositions.*;
 import static com.slack.api.model.block.element.BlockElements.*;
 import static com.slack.api.model.view.Views.*;
 
+import java.io.IOException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
+import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.views.ViewsPublishResponse;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
@@ -43,7 +46,14 @@ public class SlackApp {
                         .type("home")
                         .blocks(asBlocks(
                                 section(section -> section.text(markdownText(mt -> mt.text("*Welcome to your _App's Home_* :tada:")))),
-                                section(section -> section.text(markdownText(mt -> mt.text("Your email is: " + payload.getEvent().getUser()))))
+                                section(section -> section.text(markdownText(mt -> {
+                                        try {
+                                                return mt.text("Your email is: " + ctx.client().usersInfo(r -> r.token(ctx.getBotToken()).user(payload.getEvent().getUser())));
+                                        } catch (IOException | SlackApiException e) {
+                                                e.printStackTrace();
+                                                return mt.text("Error retrieving user info from slack.");
+                                        }
+                                })))
                         ))
                 );
                 // Update the App Home for the given user
