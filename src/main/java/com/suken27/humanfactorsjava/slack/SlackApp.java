@@ -42,7 +42,8 @@ public class SlackApp {
                 View appHomeView = view(view -> view
                         .type("home")
                         .blocks(asBlocks(
-                                section(section -> section.text(markdownText(mt -> mt.text("*Welcome to your _App's Home_* :tada:"))))
+                                section(section -> section.text(markdownText(mt -> mt.text("*Welcome to your _App's Home_* :tada:")))),
+                                section(section -> section.text(markdownText(mt -> mt.text("Your email is: " + payload.getEvent().getUser()))))
                         ))
                 );
                 // Update the App Home for the given user
