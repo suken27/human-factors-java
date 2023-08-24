@@ -36,6 +36,8 @@ public class Team {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
     private int questionsPerDay;
+    // TODO: Refactor to avoid coupling between the model and a specific messaging interface
+    private String slackBotToken;
 
     /**
      * This constructor should never be used. Use Team(TeamManager) instead.
@@ -111,6 +113,22 @@ public class Team {
 
     public void setQuestionSendingTime(LocalTime questionSendingTime) {
         this.questionSendingTime = questionSendingTime;
+    }
+
+    public int getQuestionsPerDay() {
+        return questionsPerDay;
+    }
+
+    public void setQuestionsPerDay(int questionsPerDay) {
+        this.questionsPerDay = questionsPerDay;
+    }
+
+    public String getSlackBotToken() {
+        return slackBotToken;
+    }
+
+    public void setSlackBotToken(String slackBotToken) {
+        this.slackBotToken = slackBotToken;
     }
 
     public Map<User, List<Question>> launchQuestions() {

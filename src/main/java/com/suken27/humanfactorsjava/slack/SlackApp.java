@@ -5,7 +5,8 @@ import static com.slack.api.model.block.composition.BlockCompositions.*;
 import static com.slack.api.model.block.element.BlockElements.*;
 import static com.slack.api.model.view.Views.*;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +16,15 @@ import org.springframework.core.env.Environment;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.response.users.UsersInfoResponse;
 import com.slack.api.methods.response.views.ViewsPublishResponse;
+import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
+import com.suken27.humanfactorsjava.model.Team;
+import com.suken27.humanfactorsjava.model.TeamMember;
+import com.suken27.humanfactorsjava.model.controller.ModelController;
+import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
+import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
 
 @Configuration
 public class SlackApp {
@@ -42,38 +47,38 @@ public class SlackApp {
         }
 
         @Bean
-        public App initSlackApp(AppConfig config) {
+        public App initSlackApp(AppConfig config, ModelController modelController) {
                 App app = new App(config).asOAuthApp(true);
-                // TODO: Command that adds a new member to the team checking the email of the
-                // user
-                // to assess it is a team manager or not
                 app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
                         AppHomeOpenedEvent event = payload.getEvent();
-                        String email = null;
+                        Team team;
                         try {
-                                UsersInfoResponse userInfoResponse = ctx.client()
-                                                .usersInfo(r -> r.token(ctx.getBotToken())
-                                                                .user(event.getUser()));
-                                email = userInfoResponse.getUser().getProfile().getEmail();
-                                logger.debug("Success retrieving user email from slack: {}", email);
-                        } catch (IOException | SlackApiException e) {
-                                logger.error("Error retrieving user info from slack.", e);
+                                team = modelController.checkTeamManager(event.getUser(), ctx.getBotToken());
+                        } catch (TeamManagerNotFoundException e) {
+                                logger.debug("Slack user with id {} tried to access team without being a TeamManager", event.getUser());
+                                team = null;
+                        } catch (UserNotFoundInWorkspaceException e) {
+                                // This is really improbable, but we should handle it anyway
+                                logger.error("Slack user with id {} not found in workspace", event.getUser());
+                                team = null;
                         }
-                        final String finalEmail = email;
+                        List<LayoutBlock> blocks = new ArrayList<>();
+                        if(team != null) {
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*You are a team manager* :tada:")))));
+                                for(TeamMember member : team.getMembers()) {
+                                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                        member.getSlackId() + " is a team member.")))));
+                                }
+                        } else {
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*You are not a team manager* :skull_and_crossbones:")))));
+                        }
 
                         // Build a Home tab view
                         View appHomeView = view(view -> view
                                         .type("home")
-                                        .blocks(asBlocks(
-                                                        section(section -> section.text(markdownText(mt -> mt.text(
-                                                                        "*Welcome to your _App's Home_* :tada:")))),
-                                                        section(section -> section.text(markdownText(mt -> {
-                                                                if (finalEmail == null) {
-                                                                        return mt.text("Error retrieving user info from slack");
-                                                                } else {
-                                                                        return mt.text("Your email is: " + finalEmail);
-                                                                }
-                                                        }))))));
+                                        .blocks(blocks));
                         // Update the App Home for the given user
                         if (event.getView() == null) {
                                 ViewsPublishResponse res = ctx.client().viewsPublish(r -> r

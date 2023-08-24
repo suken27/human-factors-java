@@ -25,6 +25,7 @@ public abstract class User {
     private Long id;
     @Column(nullable = false)
     private String email;
+    private String slackId;
     @OneToMany(cascade = CascadeType.ALL)
     private List<HumanFactor> humanFactors;
 
@@ -56,6 +57,14 @@ public abstract class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSlackId() {
+        return slackId;
+    }
+
+    public void setSlackId(String slackId) {
+        this.slackId = slackId;
     }
 
     public List<HumanFactor> getHumanFactors() {
