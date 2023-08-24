@@ -54,8 +54,10 @@ public class SlackMethodHandler {
         UsersListResponse result = client.usersList(r -> r
                 .token(botToken));
         for (User user : result.getMembers()) {
-            usersStoreById.put(user.getId(), user);
-            usersStoreByEmail.put(user.getProfile().getEmail(), user);
+            if(!user.isDeleted() && !user.isBot() && user.isEmailConfirmed()) {
+                usersStoreById.put(user.getId(), user);
+                usersStoreByEmail.put(user.getProfile().getEmail(), user);
+            }
         }
 
     }

@@ -67,7 +67,16 @@ public class SlackApp {
                                 logger.error("Slack user with id {} not found in workspace", event.getUser(), e);
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                 "*Unexpected error: Couldn't find the current user in the workspace* :warning:")))));
-                        } catch (SlackApiException | IOException e) {
+                        } catch (SlackApiException e) {
+                                if(e.getError() != null && e.getError().getError() == "ratelimited") {
+                                        logger.info("Too many requests to the Slack Api, the maximum amount of requests has been exceeded", e);
+                                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*Too many requests: Please try again in " + e.getResponse().header("Retry-After") + " seconds * :warning:")))));
+                                }
+                                logger.error("Error ocurred when using the SlackApi", e);
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
+                        } catch (IOException e) {
                                 logger.error("Error ocurred when using the SlackApi", e);
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                 "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
