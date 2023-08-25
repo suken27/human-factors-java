@@ -8,6 +8,7 @@ import static com.slack.api.model.view.Views.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload.Action;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.SlackApiException;
@@ -24,6 +24,7 @@ import com.slack.api.methods.response.views.ViewsPublishResponse;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
+import com.slack.api.model.view.ViewState.Value;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
@@ -150,7 +151,7 @@ public class SlackApp {
                 String selectActionId = "team_member_select_action";
                 String buttonActionId = "team_member_add_action";
                 blocks.add(actions(action -> action
-                                .blockId("team_member_button_block")
+                                .blockId("team_member_add_block")
                                 .elements(asElements(
                                                 usersSelect(us -> us
                                                                 .actionId(selectActionId)
@@ -166,19 +167,25 @@ public class SlackApp {
                 });
                 app.blockAction(buttonActionId, (req, ctx) -> {
                         logger.debug("Team member add action received. Payload: {}", req.getPayload());
-                        Action action = null;
-                        for (Action a : req.getPayload().getActions()) {
-                                if (a.getActionId().equals(selectActionId)) {
-                                        action = a;
-                                }
-                        }
-                        String respondMessage = null;
-                        if (action == null) {
-                                logger.error("Team member add action received but no select action was found in the payload. Payload: {}",
+                        Map<String, Value> values = req.getPayload().getState().getValues().get("team_member_add_block");
+                        if (values == null) {
+                                logger.error("Team member add action received but no values were found in the actions block. Payload: {}",
                                                 req.getPayload());
                                 return ctx.ack();
                         }
-                        String selectedUserId = action.getSelectedUser();
+                        Value value = values.get(selectActionId);
+                        if(value == null) {
+                                logger.error("Team member add action received but the user select block was not among the values included. Payload: {}",
+                                                req.getPayload());
+                                return ctx.ack();
+                        }
+                        String selectedUserId = value.getSelectedUser();
+                        if(selectedUserId == null) {
+                                logger.error("Team member add action received but no user was selected. Payload: {}",
+                                                req.getPayload());
+                                return ctx.ack();
+                        }
+                        String respondMessage = null;
                         String teamManagerId = req.getPayload().getUser().getId();
                         Team team = null;
                         try {
@@ -206,7 +213,6 @@ public class SlackApp {
                         if(req.getPayload().getResponseUrl() != null) {
                                 ctx.respond(respondMessage);
                         }
-                        action.setSelectedUser(null);
                         return ctx.ack();
                 });
         }
