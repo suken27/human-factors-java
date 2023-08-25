@@ -187,9 +187,10 @@ public class SlackApp {
                                 value.setSelectedUser(null);
                                 ctx.client().viewsUpdate(r -> { 
                                         View view = req.getPayload().getView();
-                                        r.viewAsString(view.toString());
+                                        r.view(view);
                                         r.viewId(view.getId());
                                         r.hash(view.getHash());
+                                        r.token(ctx.getBotToken());
                                         return r;
                                 });
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
