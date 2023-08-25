@@ -148,11 +148,11 @@ public class SlackApp {
                                                 .actionId("team_member_select_action")
                                                 .placeholder(plainText("Pick a user from the dropdown list"))))
                                 .label(plainText("Add team members"))));
-                blocks.add(input(input -> input
+                blocks.add(actions(action -> action
                                 .blockId("team_member_button_block")
-                                .element(button(b -> b
+                                .elements(asElements(button(b -> b
                                                 .actionId("team_member_add_action")
-                                                .text(plainText("Add selection"))))));
+                                                .text(plainText("Add selection")))))));
 
                 app.blockAction("team_member_select_action", (req, ctx) -> {
                         return ctx.ack();
