@@ -5,6 +5,7 @@ import static com.slack.api.model.block.composition.BlockCompositions.*;
 import static com.slack.api.model.block.element.BlockElements.*;
 import static com.slack.api.model.view.Views.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +27,6 @@ import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
-
-import io.jsonwebtoken.io.IOException;
 
 @Configuration
 public class SlackApp {
@@ -54,41 +53,8 @@ public class SlackApp {
                 App app = new App(config).asOAuthApp(true);
                 app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
                         AppHomeOpenedEvent event = payload.getEvent();
-                        Team team = null;
                         List<LayoutBlock> blocks = new ArrayList<>();
-                        try {
-                                team = modelController.checkTeamManager(event.getUser(), ctx.getBotToken());
-                        } catch (TeamManagerNotFoundException e) {
-                                logger.debug("Slack user with id {} tried to access team without being a TeamManager", event.getUser());
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*You are not a team manager* :skull_and_crossbones:")))));
-                        } catch (UserNotFoundInWorkspaceException e) {
-                                // This is really improbable, but we should handle it anyway
-                                logger.error("Slack user with id {} not found in workspace", event.getUser(), e);
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*Unexpected error: Couldn't find the current user in the workspace* :warning:")))));
-                        } catch (SlackApiException e) {
-                                if(e.getError() != null && e.getError().getError() == "ratelimited") {
-                                        logger.info("Too many requests to the Slack Api, the maximum amount of requests has been exceeded", e);
-                                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*Too many requests: Please try again in " + e.getResponse().header("Retry-After") + " seconds * :warning:")))));
-                                }
-                                logger.error("Error ocurred when using the SlackApi", e);
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
-                        } catch (IOException e) {
-                                logger.error("Error ocurred when using the SlackApi", e);
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
-                        }
-                        if(team != null) {
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                "*You are a team manager* :tada:")))));
-                                for(TeamMember member : team.getMembers()) {
-                                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                        member.getSlackId() + " is a team member.")))));
-                                }
-                        }
+                        addTeamBlocks(event.getUser(), ctx.getBotToken(), blocks, app, modelController);
 
                         // Build a Home tab view
                         View appHomeView = view(view -> view
@@ -123,6 +89,72 @@ public class SlackApp {
                                                                                                 .text("Kin Khao")))
                                                                                                 .value("v2")))))))));
                 return app;
+        }
+
+        private void addTeamBlocks(String user, String botToken, List<LayoutBlock> blocks, App app,
+                        ModelController modelController) {
+                Team team = null;
+                try {
+                        team = modelController.checkTeamManager(user, botToken);
+                } catch (TeamManagerNotFoundException e) {
+                        logger.debug("Slack user with id {} tried to access team without being a TeamManager", user);
+                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        "*You are not a team manager* :skull_and_crossbones:")))));
+                } catch (UserNotFoundInWorkspaceException e) {
+                        // This is really improbable, but we should handle it anyway
+                        logger.error("Slack user with id [{}] not found in workspace. This exception should never be thrown.",
+                                        user, e);
+                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        "*Unexpected error: Couldn't find the current user in the workspace* :warning:")))));
+                } catch (SlackApiException e) {
+                        if (e.getError() != null && e.getError().getError().equals("ratelimited")) {
+                                logger.info("Too many requests to the Slack Api, the maximum amount of requests has been exceeded",
+                                                e);
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                "*Too many requests: Please try again in "
+                                                                + e.getResponse().header("Retry-After")
+                                                                + " seconds * :warning:")))));
+                        }
+                        logger.error("Error ocurred when using the SlackApi", e);
+                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
+                } catch (IOException e) {
+                        logger.error("Error ocurred when using the SlackApi", e);
+                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
+                }
+                if (team == null) {
+                        return;
+                }
+                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                "*You are a team manager* :tada:")))));
+                listTeamMembers(team, blocks);
+                addTeamMemberAddBlock(blocks, app);
+        }
+
+        private void listTeamMembers(Team team, List<LayoutBlock> blocks) {
+                for (TeamMember member : team.getMembers()) {
+                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        member.getSlackId() + " is a team member.")))));
+                }
+        }
+
+        private void addTeamMemberAddBlock(List<LayoutBlock> blocks, App app) {
+                blocks.add(input(input -> input
+                                .blockId("team_member_add_block")
+                                .element(plainTextInput(pti -> pti
+                                                .actionId("team_member_add_action")
+                                                .placeholder(plainText("Enter a value"))
+                                                .initialValue("@")
+                                        ))
+                                .label(plainText("Add a team member"))
+                        ));
+                
+                app.blockAction("team_member_add_action", (req, ctx) -> {
+                        logger.debug("Team member add action received");
+                        logger.debug("Request payload: {}", req.getPayload());
+                        return ctx.ack();
+                });
         }
 
 }
