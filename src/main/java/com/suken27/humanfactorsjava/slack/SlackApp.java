@@ -154,11 +154,13 @@ public class SlackApp {
                                                                 .text(plainText("Add selection")))))));
 
                 app.blockAction("team_member_select_action", (req, ctx) -> {
+                        logger.debug("Team member select action received");
+                        logger.debug("Request payload: {}", req.getPayload());
                         return ctx.ack();
                 });
                 app.blockAction("team_member_add_action", (req, ctx) -> {
                         logger.debug("Team member add action received");
-                        logger.debug("Request payload: {}", ctx.getAdditionalValues().get("team_member_select_block"));
+                        logger.debug("Request payload: {}", req.getPayload());
                         return ctx.ack();
                 });
         }
