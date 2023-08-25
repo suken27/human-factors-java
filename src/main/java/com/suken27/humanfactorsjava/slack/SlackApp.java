@@ -167,7 +167,7 @@ public class SlackApp {
                 });
                 app.blockAction(buttonActionId, (req, ctx) -> {
                         logger.debug("Team member add action received. Payload: {}", req.getPayload());
-                        Map<String, Value> values = req.getPayload().getState().getValues().get("team_member_add_block");
+                        Map<String, Value> values = req.getPayload().getView().getState().getValues().get("team_member_add_block");
                         if (values == null) {
                                 logger.error("Team member add action received but no values were found in the actions block. Payload: {}",
                                                 req.getPayload());
