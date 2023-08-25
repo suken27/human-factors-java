@@ -142,12 +142,11 @@ public class SlackApp {
         private void addTeamMemberAddBlock(List<LayoutBlock> blocks, App app) {
                 blocks.add(input(input -> input
                                 .blockId("team_member_add_block")
-                                .element(plainTextInput(pti -> pti
+                                .element(multiUsersSelect(mus -> mus
                                                 .actionId("team_member_add_action")
                                                 .placeholder(plainText("Enter a value"))
-                                                .initialValue("@")
                                         ))
-                                .label(plainText("Add a team member"))
+                                .label(plainText("Add team members"))
                         ));
                 
                 app.blockAction("team_member_add_action", (req, ctx) -> {
