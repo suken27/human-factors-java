@@ -128,7 +128,9 @@ public class SlackApp {
                 }
                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                 "*You are a team manager* :tada:")))));
+                blocks.add(divider());
                 listTeamMembers(team, blocks);
+                blocks.add(divider());
                 addTeamMemberAddBlock(blocks, app);
         }
 
@@ -142,9 +144,9 @@ public class SlackApp {
         private void addTeamMemberAddBlock(List<LayoutBlock> blocks, App app) {
                 blocks.add(input(input -> input
                                 .blockId("team_member_add_block")
-                                .element(multiUsersSelect(mus -> mus
+                                .element(usersSelect(us -> us
                                                 .actionId("team_member_add_action")
-                                                .placeholder(plainText("Enter a value"))
+                                                .placeholder(plainText("Pick a user from the dropdown list"))
                                         ))
                                 .label(plainText("Add team members"))
                         ));
