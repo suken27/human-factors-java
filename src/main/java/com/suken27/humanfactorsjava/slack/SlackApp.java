@@ -142,17 +142,16 @@ public class SlackApp {
         }
 
         private void addTeamMemberAddBlock(List<LayoutBlock> blocks, App app) {
-                blocks.add(input(input -> input
-                                .blockId("team_member_select_block")
-                                .element(usersSelect(us -> us
-                                                .actionId("team_member_select_action")
-                                                .placeholder(plainText("Pick a user from the dropdown list"))))
-                                .label(plainText("Add team members"))));
                 blocks.add(actions(action -> action
                                 .blockId("team_member_button_block")
-                                .elements(asElements(button(b -> b
-                                                .actionId("team_member_add_action")
-                                                .text(plainText("Add selection")))))));
+                                .elements(asElements(
+                                                usersSelect(us -> us
+                                                                .actionId("team_member_select_action")
+                                                                .placeholder(plainText(
+                                                                                "Pick a user from the dropdown list"))),
+                                                button(b -> b
+                                                                .actionId("team_member_add_action")
+                                                                .text(plainText("Add selection")))))));
 
                 app.blockAction("team_member_select_action", (req, ctx) -> {
                         return ctx.ack();
