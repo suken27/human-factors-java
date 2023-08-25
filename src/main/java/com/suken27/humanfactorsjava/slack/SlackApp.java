@@ -80,21 +80,9 @@ public class SlackApp {
                         }
                         return ctx.ack();
                 });
-                app.command("/hello", (req, ctx) -> ctx.ack(r -> r.text("What's up?")
-                                .blocks(asBlocks(
-                                                section(section -> section
-                                                                .text(markdownText("*Please select a restaurant:*"))),
-                                                divider(),
-                                                actions(actions -> actions
-                                                                .elements(asElements(
-                                                                                button(b -> b.text(plainText(pt -> pt
-                                                                                                .emoji(true)
-                                                                                                .text("Farmhouse")))
-                                                                                                .value("v1")),
-                                                                                button(b -> b.text(plainText(pt -> pt
-                                                                                                .emoji(true)
-                                                                                                .text("Kin Khao")))
-                                                                                                .value("v2")))))))));
+                app.command("/questions", (req, ctx) -> ctx.ack(r -> r
+                        
+                ));
                 return app;
         }
 
@@ -137,17 +125,19 @@ public class SlackApp {
                 blocks.add(divider());
                 listTeamMembers(team, blocks);
                 blocks.add(divider());
-                addTeamMemberAddBlock(blocks, app);
+                addTeamMemberBlock(blocks, app);
         }
 
         private void listTeamMembers(Team team, List<LayoutBlock> blocks) {
                 for (TeamMember member : team.getMembers()) {
-                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                        member.getSlackId() + " is a team member.")))));
+                        if(member.getSlackId() != null) {
+                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        "<@" + member.getSlackId() + "> is a team member.")))));
+                        } 
                 }
         }
 
-        private void addTeamMemberAddBlock(List<LayoutBlock> blocks, App app) {
+        private void addTeamMemberBlock(List<LayoutBlock> blocks, App app) {
                 String selectActionId = "team_member_select_action";
                 String buttonActionId = "team_member_add_action";
                 blocks.add(actions(action -> action
@@ -165,7 +155,11 @@ public class SlackApp {
                         logger.debug("Team member select action received. Payload: {}", req.getPayload());
                         return ctx.ack();
                 });
-                app.blockAction(buttonActionId, (req, ctx) -> {
+                addTeamMemberHandler(app, selectActionId, buttonActionId);
+        }
+
+        private App addTeamMemberHandler(App app, String selectActionId, String buttonActionId) {
+                return app.blockAction(buttonActionId, (req, ctx) -> {
                         logger.debug("Team member add action received. Payload: {}", req.getPayload());
                         Map<String, Value> values = req.getPayload().getView().getState().getValues().get("team_member_add_block");
                         if (values == null) {
@@ -185,36 +179,33 @@ public class SlackApp {
                                                 req.getPayload());
                                 return ctx.ack();
                         }
-                        String respondMessage = null;
                         String teamManagerId = req.getPayload().getUser().getId();
                         Team team = null;
                         try {
                                 team = slackMethodHandler.addTeamMember(teamManagerId, selectedUserId,
                                                 ctx.getBotToken());
+                                ctx.client().viewsUpdate(r -> r
+                                        .view(req.getPayload().getView())
+                                );
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
                                 logger.debug("Slack user with id [{}] tried to add a team member that is already in the team",
                                                 teamManagerId);
-                                respondMessage = "The selected user is already in the team";
                         } catch (MemberInAnotherTeamException e) {
                                 logger.debug("Slack user with id [{}] tried to add a team member that is already in another team",
                                                 teamManagerId);
-                                respondMessage = "The selected user is already in another team";
                         } catch (SlackApiException | IOException | UserNotFoundInWorkspaceException
                                         | TeamManagerNotFoundException e) {
                                 logger.error("Error ocurred when trying to add the team member [{}] to the team managed by [{}]",
                                                 selectedUserId, teamManagerId, e);
-                                respondMessage = "Unexpected error ocurred when trying to add the team member to the team";
-                        }
-                        if(respondMessage == null) {
-                                respondMessage = "Added";
-                        }
-                        if(req.getPayload().getResponseUrl() != null) {
-                                ctx.respond(respondMessage);
                         }
                         return ctx.ack();
                 });
+        }
+
+        private LayoutBlock questionBlock() {
+                return null;
         }
 
 }

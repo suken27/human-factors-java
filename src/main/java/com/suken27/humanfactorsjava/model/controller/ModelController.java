@@ -64,7 +64,7 @@ public class ModelController {
     public Team addTeamMember(String teamManagerEmail, String email, String slackId) throws MemberAlreadyInTeamException, MemberInAnotherTeamException {
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
         // Team should not be null as every team manager is created with an empty team, so no check should be required
-        if(team.isMember(email)) {
+        if(teamManagerEmail.equals(email) || team.isMember(email)) {
             throw new MemberAlreadyInTeamException(email);
         }
         TeamMember teamMember = teamMemberRepository.findByEmail(email);
