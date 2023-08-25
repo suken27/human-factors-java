@@ -101,12 +101,7 @@ public class Team {
     }
 
     public boolean isMember(String email) {
-        for (TeamMember teamMember : members) {
-            if(teamMember.getEmail().equals(email)) {
-                return true;
-            }
-        }
-        return false;
+        return members.stream().anyMatch(member -> member.getEmail().equals(email));
     }
 
     public LocalTime getQuestionSendingTime() {

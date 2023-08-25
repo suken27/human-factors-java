@@ -27,6 +27,7 @@ import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectTimeFormatException;
 import com.suken27.humanfactorsjava.rest.util.ApiValidator;
+import com.suken27.humanfactorsjava.slack.SlackMethodHandler;
 import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
 
 @RestController
@@ -34,6 +35,9 @@ public class TeamController {
 
     @Autowired
     private ModelController modelController;
+
+    @Autowired
+    private SlackMethodHandler slackMethodHandler;
 
     @Autowired
     private ApiValidator validator;
@@ -53,7 +57,13 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = modelController.addTeamMember(teamManagerEmail, email);
+        String id = null;
+        try {
+            id = slackMethodHandler.getUserId(email, teamManagerEmail);
+        } catch(Exception e) {
+            logger.debug("Tried to retrieve member slack id for member [{}], but failed. No slack id will be added to the member.", email, e);
+        }
+        Team team = modelController.addTeamMember(teamManagerEmail, email, id);
         return ResponseEntity.ok().body(toDto(team.getMembers()));
     }
 
