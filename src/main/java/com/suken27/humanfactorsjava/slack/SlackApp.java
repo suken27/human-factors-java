@@ -172,10 +172,10 @@ public class SlackApp {
                                         action = a;
                                 }
                         }
+                        String respondMessage = null;
                         if (action == null) {
                                 logger.error("Team member add action received but no select action was found in the payload. Payload: {}",
                                                 req.getPayload());
-                                ctx.respond("Unexpected error ocurred when trying to add the team member to the team");
                                 return ctx.ack();
                         }
                         String selectedUserId = action.getSelectedUser();
@@ -184,25 +184,29 @@ public class SlackApp {
                         try {
                                 team = slackMethodHandler.addTeamMember(teamManagerId, selectedUserId,
                                                 ctx.getBotToken());
+                                logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
+                                        teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
                                 logger.debug("Slack user with id [{}] tried to add a team member that is already in the team",
                                                 teamManagerId);
-                                ctx.respond("The selected user is already in the team");
+                                respondMessage = "The selected user is already in the team";
                         } catch (MemberInAnotherTeamException e) {
                                 logger.debug("Slack user with id [{}] tried to add a team member that is already in another team",
                                                 teamManagerId);
-                                ctx.respond("The selected user is already in another team");
+                                respondMessage = "The selected user is already in another team";
                         } catch (SlackApiException | IOException | UserNotFoundInWorkspaceException
                                         | TeamManagerNotFoundException e) {
                                 logger.error("Error ocurred when trying to add the team member [{}] to the team managed by [{}]",
                                                 selectedUserId, teamManagerId, e);
-                                ctx.respond("Unexpected error ocurred when trying to add the team member to the team");
-                                return ctx.ack();
+                                respondMessage = "Unexpected error ocurred when trying to add the team member to the team";
                         }
-                        logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
-                                        teamManagerId);
+                        if(respondMessage == null) {
+                                respondMessage = "Added";
+                        }
+                        if(req.getPayload().getResponseUrl() != null) {
+                                ctx.respond(respondMessage);
+                        }
                         action.setSelectedUser(null);
-                        ctx.respond("Added");
                         return ctx.ack();
                 });
         }
