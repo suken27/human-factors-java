@@ -184,9 +184,14 @@ public class SlackApp {
                         try {
                                 team = slackMethodHandler.addTeamMember(teamManagerId, selectedUserId,
                                                 ctx.getBotToken());
-                                ctx.client().viewsUpdate(r -> r
-                                        .view(req.getPayload().getView())
-                                );
+                                value.setSelectedUser(null);
+                                ctx.client().viewsUpdate(r -> { 
+                                        View view = req.getPayload().getView();
+                                        r.view(view);
+                                        r.viewId(view.getId());
+                                        r.hash(view.getHash());
+                                        return r;
+                                });
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
@@ -204,8 +209,21 @@ public class SlackApp {
                 });
         }
 
-        private LayoutBlock questionBlock() {
-                return null;
+        private List<LayoutBlock> questionBlock(String questionText, List<String> questionOptions) {
+                List<LayoutBlock> blocks = new ArrayList<>();
+                blocks.add(section(section -> section
+                        .text(markdownText(mt -> mt.text(questionText)))));
+                for (String option : questionOptions) {
+                        blocks.add(actions(action -> action
+                                .elements(asElements(
+                                        button(b -> b
+                                                .text(plainText(option))
+                                                .value(option)
+                                                .actionId("question_response_action"))
+                                ))
+                        ));
+                }
+                return blocks;
         }
 
 }
