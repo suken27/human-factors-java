@@ -235,8 +235,8 @@ public class SlackApp {
                 return blocks;
         }
 
-        private void updateView(View view, String userId, String hash, Context context) {
-                context.asyncClient().viewsPublish(r -> {
+        private void updateView(View view, String userId, String hash, Context context) throws IOException, SlackApiException {
+                context.client().viewsPublish(r -> {
                         r.view(view);
                         r.userId(userId);
                         r.hash(hash);
