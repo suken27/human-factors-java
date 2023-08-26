@@ -187,8 +187,7 @@ public class SlackApp {
                                 value.setSelectedUser(null);
                                 ctx.client().viewsUpdate(r -> { 
                                         View view = req.getPayload().getView();
-                                        logger.debug("View: {}", view);
-                                        r.view(view);
+                                        r.viewAsString(view.toString());
                                         r.viewId(view.getId());
                                         r.hash(view.getHash());
                                         r.token(ctx.getBotToken());
