@@ -183,7 +183,7 @@ public class SlackApp {
                                 View appHomeView = view(view -> view
                                         .type("home")
                                         .blocks(req.getPayload().getView().getBlocks()));
-                                updateView(appHomeView, teamManagerId, req.getPayload().getView().getHash(), ctx);
+                                updateView(appHomeView, teamManagerId, null, ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
