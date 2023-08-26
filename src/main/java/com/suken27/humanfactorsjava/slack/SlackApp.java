@@ -20,7 +20,6 @@ import org.springframework.core.env.Environment;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.response.views.ViewsPublishResponse;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
@@ -69,11 +68,11 @@ public class SlackApp {
                                         .blocks(blocks));
                         // Update the App Home for the given user
                         if (event.getView() == null) {
-                                ViewsPublishResponse res = ctx.client().viewsPublish(r -> r
+                                ctx.client().viewsPublish(r -> r
                                                 .userId(event.getUser())
                                                 .view(appHomeView));
                         } else {
-                                ViewsPublishResponse res = ctx.client().viewsPublish(r -> r
+                                ctx.client().viewsPublish(r -> r
                                                 .userId(event.getUser())
                                                 .hash(event.getView().getHash())
                                                 .view(appHomeView));
@@ -185,9 +184,9 @@ public class SlackApp {
                                 team = slackMethodHandler.addTeamMember(teamManagerId, selectedUserId,
                                                 ctx.getBotToken());
                                 value.setSelectedUser(null);
-                                ctx.client().viewsUpdate(r -> { 
+                                ctx.asyncClient().viewsUpdate(r -> { 
                                         View view = req.getPayload().getView();
-                                        r.viewAsString(view.toString());
+                                        r.view(view);
                                         r.viewId(view.getId());
                                         r.hash(view.getHash());
                                         r.token(ctx.getBotToken());
