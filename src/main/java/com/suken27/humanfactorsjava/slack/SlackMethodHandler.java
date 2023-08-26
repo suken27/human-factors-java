@@ -12,9 +12,10 @@ import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.users.UsersListResponse;
 import com.slack.api.model.User;
-import com.suken27.humanfactorsjava.model.Team;
-import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
+import com.suken27.humanfactorsjava.model.dto.TeamDto;
+import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
+import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
@@ -65,25 +66,27 @@ public class SlackMethodHandler {
         return user;
     }
 
-    public Team checkTeamManager(String id, String slackBotToken)
+    public TeamDto checkTeamManager(String id, String slackBotToken)
             throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException {
         String email = getUserEmail(id, slackBotToken);
-        Team team = modelController.getTeam(email);
+        TeamDto team = modelController.getTeam(email);
         if (team == null) {
             throw new TeamManagerNotFoundException(email);
         }
         // TODO: Decouple this logic from the model
-        for(TeamMember member : team.getMembers()) {
+        for(TeamMemberDto member : team.getMembers()) {
             if (member.getSlackId() == null) {
                 member.setSlackId(getUserId(member.getEmail(), slackBotToken));
             }
         }
-        team.getManager().setSlackId(id);
         team.setSlackBotToken(slackBotToken);
-        return team;
+        TeamManagerDto teamManager = modelController.getTeamManager(email);
+        teamManager.setSlackId(id);
+        modelController.updateTeamManager(teamManager);
+        return modelController.updateTeam(team);
     }
 
-    public Team addTeamMember(String teamManagerId, String userId, String slackBotToken)
+    public TeamDto addTeamMember(String teamManagerId, String userId, String slackBotToken)
             throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException,
             MemberAlreadyInTeamException, MemberInAnotherTeamException {
         return modelController.addTeamMember(getUserEmail(teamManagerId, slackBotToken),

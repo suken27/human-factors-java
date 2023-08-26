@@ -25,8 +25,8 @@ import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState.Value;
-import com.suken27.humanfactorsjava.model.Team;
-import com.suken27.humanfactorsjava.model.TeamMember;
+import com.suken27.humanfactorsjava.model.dto.TeamDto;
+import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
@@ -82,7 +82,7 @@ public class SlackApp {
         }
 
         private void addTeamBlocks(String user, String botToken, List<LayoutBlock> blocks, App app) {
-                Team team = null;
+                TeamDto team = null;
                 try {
                         team = slackMethodHandler.checkTeamManager(user, botToken);
                 } catch (TeamManagerNotFoundException e) {
@@ -123,8 +123,8 @@ public class SlackApp {
                 addTeamMemberBlock(blocks, app);
         }
 
-        private void listTeamMembers(Team team, List<LayoutBlock> blocks) {
-                for (TeamMember member : team.getMembers()) {
+        private void listTeamMembers(TeamDto team, List<LayoutBlock> blocks) {
+                for (TeamMemberDto member : team.getMembers()) {
                         if(member.getSlackId() != null) {
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "<@" + member.getSlackId() + "> is a team member.")))));
@@ -175,12 +175,15 @@ public class SlackApp {
                                 return ctx.ack();
                         }
                         String teamManagerId = req.getPayload().getUser().getId();
-                        Team team = null;
+                        TeamDto team = null;
                         try {
                                 team = slackMethodHandler.addTeamMember(teamManagerId, selectedUserId,
                                                 ctx.getBotToken());
                                 value.setSelectedUser(null);
-                                updateView(req.getPayload().getView(), teamManagerId, req.getPayload().getView().getHash(), ctx);
+                                View appHomeView = view(view -> view
+                                        .type("home")
+                                        .blocks(req.getPayload().getView().getBlocks()));
+                                updateView(appHomeView, teamManagerId, req.getPayload().getView().getHash(), ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {

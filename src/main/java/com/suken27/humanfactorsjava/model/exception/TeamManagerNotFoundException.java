@@ -6,4 +6,8 @@ public class TeamManagerNotFoundException extends RuntimeException {
         super("The email '" + email + "' does not belong to a registered team manager.");
     }
 
+    public TeamManagerNotFoundException(Long id) {
+        super("The id '" + id + "' does not belong to a registered team manager.");
+    }
+
 }

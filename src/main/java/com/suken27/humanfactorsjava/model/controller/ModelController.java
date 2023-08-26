@@ -1,6 +1,7 @@
 package com.suken27.humanfactorsjava.model.controller;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,9 +11,12 @@ import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.model.TeamMember;
+import com.suken27.humanfactorsjava.model.dto.TeamDto;
+import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
 import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
+import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamMemberNotFoundException;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
@@ -22,7 +26,6 @@ import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
 @Component
 public class ModelController {
 
-    // TODO: Refactor class to return DTOs instead of entities
     // TODO: Refactor model to decouple the messaging logic from the model
 
     @Autowired
@@ -46,22 +49,52 @@ public class ModelController {
             throw new IncorrectLoginException();
         }
     }
+
+    public TeamManagerDto getTeamManager(String email) {
+        TeamManager teamManager = teamManagerRepository.findByEmail(email);
+        if(teamManager == null) {
+            throw new TeamManagerNotFoundException(email);
+        }
+        return new TeamManagerDto(teamManager);
+    }
     
-    public TeamManager registerTeamManager(String email, String password) {
+    public TeamManagerDto registerTeamManager(String email, String password) {
         if (teamManagerRepository.findByEmail(email) != null) {
             throw new EmailInUseException(email);
         }
         TeamManager entity = new TeamManager(humanFactorFactory);
         entity.setEmail(email);
         entity.setPassword(passwordEncoder.encode(password));
-        return teamManagerRepository.save(entity);
+        return new TeamManagerDto(teamManagerRepository.save(entity));
     }
 
-    public Team getTeam(String teamManagerEmail) {
-        return teamRepository.findByTeamManagerEmail(teamManagerEmail);
+    public TeamManagerDto updateTeamManager(TeamManagerDto teamManagerDto) {
+        TeamManager teamManager = teamManagerRepository.findByEmail(teamManagerDto.getEmail());
+        if(teamManager == null) {
+            throw new TeamManagerNotFoundException(teamManagerDto.getEmail());
+        }
+        teamManager.setSlackId(teamManagerDto.getSlackId());
+        return new TeamManagerDto(teamManagerRepository.save(teamManager));
     }
 
-    public Team addTeamMember(String teamManagerEmail, String email, String slackId) throws MemberAlreadyInTeamException, MemberInAnotherTeamException {
+    public TeamDto getTeam(String teamManagerEmail) {
+        return new TeamDto(teamRepository.findByTeamManagerEmail(teamManagerEmail));
+    }
+
+    public TeamDto updateTeam(TeamDto teamDto) {
+        Team team = teamRepository.findByTeamManagerId(teamDto.getManager());
+        if(team == null) {
+            throw new TeamManagerNotFoundException(teamDto.getManager());
+        }
+        // parse questionSendingTime to LocalTime
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        team.setQuestionSendingTime(LocalTime.parse(teamDto.getQuestionSendingTime(), dateTimeFormatter));
+        team.setQuestionsPerDay(teamDto.getQuestionsPerDay());
+        team.setSlackBotToken(teamDto.getSlackBotToken());
+        return new TeamDto(teamRepository.save(team));
+    }
+
+    public TeamDto addTeamMember(String teamManagerEmail, String email, String slackId) throws MemberAlreadyInTeamException, MemberInAnotherTeamException {
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
         // Team should not be null as every team manager is created with an empty team, so no check should be required
         if(teamManagerEmail.equals(email) || team.isMember(email)) {
@@ -76,10 +109,10 @@ public class ModelController {
         teamMember.setTeam(team);
         team.addMember(teamMember);
         teamMember.setSlackId(slackId);
-        return teamRepository.save(team);
+        return new TeamDto(teamRepository.save(team));
     }
 
-    public Team removeTeamMember(String teamManagerEmail, String email) {
+    public TeamDto removeTeamMember(String teamManagerEmail, String email) {
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
         // Team should not be null as every team manager is created with an empty team, so no check should be required
         if(!team.isMember(email)) {
@@ -91,13 +124,13 @@ public class ModelController {
             throw new TeamMemberNotFoundException(email);
         }
         team.removeMember(teamMember);
-        return teamRepository.save(team);
+        return new TeamDto(teamRepository.save(team));
     }
 
-    public Team modifyQuestionSendingTime(String teamManagerEmail, LocalTime questionSendingTime) {
+    public TeamDto modifyQuestionSendingTime(String teamManagerEmail, LocalTime questionSendingTime) {
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
         team.setQuestionSendingTime(questionSendingTime);
-        return teamRepository.save(team);
+        return new TeamDto(teamRepository.save(team));
     }
 
 }

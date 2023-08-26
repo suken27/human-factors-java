@@ -2,8 +2,6 @@ package com.suken27.humanfactorsjava.rest.api;
 
 import java.io.IOException;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.slack.api.methods.SlackApiException;
-import com.suken27.humanfactorsjava.model.Team;
-import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
-import com.suken27.humanfactorsjava.rest.dto.TeamDto;
-import com.suken27.humanfactorsjava.rest.dto.TeamMemberDto;
+import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectTimeFormatException;
 import com.suken27.humanfactorsjava.rest.util.ApiValidator;
@@ -47,8 +42,8 @@ public class TeamController {
     @GetMapping("/teams")
     public ResponseEntity<?> getTeam() {
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = modelController.getTeam(teamManagerEmail);
-        return ResponseEntity.ok().body(new TeamDto(team));
+        TeamDto team = modelController.getTeam(teamManagerEmail);
+        return ResponseEntity.ok().body(team);
     }
 
     @PostMapping("/teams")
@@ -63,8 +58,8 @@ public class TeamController {
         } catch(Exception e) {
             logger.debug("Tried to retrieve member slack id for member [{}], but failed. No slack id will be added to the member.", email, e);
         }
-        Team team = modelController.addTeamMember(teamManagerEmail, email, id);
-        return ResponseEntity.ok().body(toDto(team.getMembers()));
+        TeamDto team = modelController.addTeamMember(teamManagerEmail, email, id);
+        return ResponseEntity.ok().body(team);
     }
 
     @DeleteMapping("/teams/{email}")
@@ -73,8 +68,8 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(email));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = modelController.removeTeamMember(teamManagerEmail, email);
-        return ResponseEntity.ok().body(toDto(team.getMembers()));
+        TeamDto team = modelController.removeTeamMember(teamManagerEmail, email);
+        return ResponseEntity.ok().body(team);
     }
 
     @PutMapping("/teams/time")
@@ -84,24 +79,8 @@ public class TeamController {
             return ResponseEntity.badRequest().body(new IncorrectTimeFormatException(questionSendingTime));
         }
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Team team = modelController.modifyQuestionSendingTime(teamManagerEmail, localTime);
-        return ResponseEntity.ok().body(new TeamDto(team));
-    }
-
-    private TeamMemberDto toDto(TeamMember teamMember) {
-        TeamMemberDto dto = new TeamMemberDto();
-        dto.setEmail(teamMember.getEmail());
-        dto.setId(teamMember.getId());
-        dto.setTeam(teamMember.getTeam().getId());
-        return dto;
-    }
-
-    private List<TeamMemberDto> toDto(List<TeamMember> teamMembers) {
-        List<TeamMemberDto> dtos = new ArrayList<>();
-        for (TeamMember teamMember : teamMembers) {
-            dtos.add(toDto(teamMember));
-        }
-        return dtos;
+        TeamDto team = modelController.modifyQuestionSendingTime(teamManagerEmail, localTime);
+        return ResponseEntity.ok().body(team);
     }
 
 }
