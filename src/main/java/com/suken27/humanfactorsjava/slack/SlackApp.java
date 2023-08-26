@@ -25,6 +25,7 @@ import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState.Value;
+import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
@@ -39,6 +40,9 @@ public class SlackApp {
         private SlackMethodHandler slackMethodHandler;
 
         public static final Logger logger = LoggerFactory.getLogger(SlackApp.class);
+
+        private static final String USER_SELECT_ACTION_ID = "team_member_select_action";
+        private static final String ADD_MEMBER_BUTTON_ACTION_ID = "team_member_add_action";
 
         @Bean
         public AppConfig loadOAuthConfig(Environment environment) {
@@ -58,11 +62,10 @@ public class SlackApp {
         @Bean
         public App initSlackApp(AppConfig config) {
                 App app = new App(config).asOAuthApp(true);
+                addActionHandlers(app);
                 app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
                         AppHomeOpenedEvent event = payload.getEvent();
-                        List<LayoutBlock> blocks = new ArrayList<>();
-                        addTeamBlocks(event.getUser(), ctx.getBotToken(), blocks, app);
-
+                        List<LayoutBlock> blocks = addTeamBlocks(event.getUser(), ctx.getBotToken(), app);
                         // Build a Home tab view
                         View appHomeView = view(view -> view
                                         .type("home")
@@ -75,14 +78,17 @@ public class SlackApp {
                         }
                         return ctx.ack();
                 });
-                app.command("/questions", (req, ctx) -> ctx.ack(r -> r
-                        
-                ));
+                app.command("/questions", (req, ctx) -> ctx.ack(r -> {
+                        // TODO: Implement
+                        launchQuestions();
+                        return null;
+                }));
                 return app;
         }
 
-        private void addTeamBlocks(String user, String botToken, List<LayoutBlock> blocks, App app) {
+        private List<LayoutBlock> addTeamBlocks(String user, String botToken, App app) {
                 TeamDto team = null;
+                List<LayoutBlock> blocks = new ArrayList<>();
                 try {
                         team = slackMethodHandler.checkTeamManager(user, botToken);
                 } catch (TeamManagerNotFoundException e) {
@@ -114,13 +120,22 @@ public class SlackApp {
                 }
                 if (team == null) {
                         blocks.add(header(h -> h.text(plainText("You are not a team manager"))));
-                        return;
+                        return blocks;
                 }
                 blocks.add(header(h -> h.text(plainText("You are a team manager"))));
                 blocks.add(divider());
                 listTeamMembers(team, blocks);
                 blocks.add(divider());
                 addTeamMemberBlock(blocks, app);
+                return blocks;
+        }
+
+        private App addActionHandlers(App app) {
+                app.blockAction(USER_SELECT_ACTION_ID, (req, ctx) -> {
+                        logger.debug("Team member select action received. Payload: {}", req.getPayload());
+                        return ctx.ack();
+                });
+                return addTeamMemberHandler(app);
         }
 
         private void listTeamMembers(TeamDto team, List<LayoutBlock> blocks) {
@@ -133,28 +148,20 @@ public class SlackApp {
         }
 
         private void addTeamMemberBlock(List<LayoutBlock> blocks, App app) {
-                String selectActionId = "team_member_select_action";
-                String buttonActionId = "team_member_add_action";
                 blocks.add(actions(action -> action
                                 .blockId("team_member_add_block")
                                 .elements(asElements(
                                                 usersSelect(us -> us
-                                                                .actionId(selectActionId)
+                                                                .actionId(USER_SELECT_ACTION_ID)
                                                                 .placeholder(plainText(
                                                                                 "Pick a user from the dropdown list"))),
                                                 button(b -> b
-                                                                .actionId(buttonActionId)
+                                                                .actionId(ADD_MEMBER_BUTTON_ACTION_ID)
                                                                 .text(plainText("Add selection")))))));
-
-                app.blockAction(selectActionId, (req, ctx) -> {
-                        logger.debug("Team member select action received. Payload: {}", req.getPayload());
-                        return ctx.ack();
-                });
-                addTeamMemberHandler(app, selectActionId, buttonActionId);
         }
 
-        private App addTeamMemberHandler(App app, String selectActionId, String buttonActionId) {
-                return app.blockAction(buttonActionId, (req, ctx) -> {
+        private App addTeamMemberHandler(App app) {
+                return app.blockAction(ADD_MEMBER_BUTTON_ACTION_ID, (req, ctx) -> {
                         logger.debug("Team member add action received. Payload: {}", req.getPayload());
                         Map<String, Value> values = req.getPayload().getView().getState().getValues().get("team_member_add_block");
                         if (values == null) {
@@ -162,7 +169,7 @@ public class SlackApp {
                                                 req.getPayload());
                                 return ctx.ack();
                         }
-                        Value value = values.get(selectActionId);
+                        Value value = values.get(USER_SELECT_ACTION_ID);
                         if(value == null) {
                                 logger.error("Team member add action received but the user select block was not among the values included. Payload: {}",
                                                 req.getPayload());
@@ -182,8 +189,9 @@ public class SlackApp {
                                 value.setSelectedUser(null);
                                 View appHomeView = view(view -> view
                                         .type("home")
-                                        .blocks(req.getPayload().getView().getBlocks()));
-                                updateView(appHomeView, teamManagerId, null, ctx);
+                                        .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken(), app)));
+                                // TODO: Fix. This should work, but fails because the hash code does not match the current view.
+                                updateView(appHomeView, teamManagerId, req.getPayload().getView().getHash(), ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
@@ -201,11 +209,20 @@ public class SlackApp {
                 });
         }
 
-        private List<LayoutBlock> questionBlock(String questionText, List<String> questionOptions) {
+        private List<LayoutBlock> questionBlocks(List<QuestionDto> questions) {
+                List<LayoutBlock> blocks = new ArrayList<>();
+                for(QuestionDto question : questions) {
+                        blocks.addAll(questionBlock(question));
+                        blocks.add(divider());
+                }
+                return blocks;
+        }
+
+        private List<LayoutBlock> questionBlock(QuestionDto question) {
                 List<LayoutBlock> blocks = new ArrayList<>();
                 blocks.add(section(section -> section
-                        .text(markdownText(mt -> mt.text(questionText)))));
-                for (String option : questionOptions) {
+                        .text(markdownText(mt -> mt.text(question.getQuestionText())))));
+                for (String option : question.getOptions()) {
                         blocks.add(actions(action -> action
                                 .elements(asElements(
                                         button(b -> b
@@ -225,6 +242,10 @@ public class SlackApp {
                         r.hash(hash);
                         return r;
                 });
+        }
+
+        private void launchQuestions() {
+                // TODO: Implement
         }
 
 }

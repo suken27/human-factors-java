@@ -1,6 +1,8 @@
 package com.suken27.humanfactorsjava.slack;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -13,9 +15,11 @@ import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.users.UsersListResponse;
 import com.slack.api.model.User;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
+import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
 import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
+import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
@@ -91,6 +95,11 @@ public class SlackMethodHandler {
             MemberAlreadyInTeamException, MemberInAnotherTeamException {
         return modelController.addTeamMember(getUserEmail(teamManagerId, slackBotToken),
                 getUserEmail(userId, slackBotToken), userId);
+    }
+
+    public Map<UserDto, List<QuestionDto>> launchQuestions(String teamManagerId, String slackBotToken)
+            throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException {
+        return modelController.launchQuestions(getUserEmail(teamManagerId, slackBotToken));
     }
 
     private void fetchUsers(String botToken) throws SlackApiException, IOException {

@@ -5,7 +5,7 @@ import com.suken27.humanfactorsjava.model.User;
 import lombok.Data;
 
 @Data
-public abstract class UserDto {
+public class UserDto {
     
     private Long id;
     private String email;
@@ -15,7 +15,7 @@ public abstract class UserDto {
         super();
     }
 
-    protected UserDto(User entity) {
+    public UserDto(User entity) {
         setId(entity.getId());
         setEmail(entity.getEmail());
     }

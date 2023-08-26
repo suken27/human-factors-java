@@ -2,17 +2,24 @@ package com.suken27.humanfactorsjava.model.controller;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.suken27.humanfactorsjava.model.HumanFactorFactory;
+import com.suken27.humanfactorsjava.model.Question;
 import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.model.TeamMember;
+import com.suken27.humanfactorsjava.model.User;
+import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
+import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
@@ -27,6 +34,7 @@ import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
 public class ModelController {
 
     // TODO: Refactor model to decouple the messaging logic from the model
+    // TODO: Cache users to avoid fetching them every time
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -131,6 +139,16 @@ public class ModelController {
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
         team.setQuestionSendingTime(questionSendingTime);
         return new TeamDto(teamRepository.save(team));
+    }
+
+    public Map<UserDto, List<QuestionDto>> launchQuestions(String teamManagerEmail) {
+        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+        Map<User, List<Question>> questions = team.launchQuestions();
+        Map<UserDto, List<QuestionDto>> questionsDto = new HashMap<>();
+        for(User user : questions.keySet()) {
+            questionsDto.put(new UserDto(user), QuestionDto.toDto(questions.get(user)));
+        }
+        return questionsDto;
     }
 
 }
