@@ -62,10 +62,9 @@ public class SlackApp {
         @Bean
         public App initSlackApp(AppConfig config) {
                 App app = new App(config).asOAuthApp(true);
-                addActionHandlers(app);
                 app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
                         AppHomeOpenedEvent event = payload.getEvent();
-                        List<LayoutBlock> blocks = addTeamBlocks(event.getUser(), ctx.getBotToken(), app);
+                        List<LayoutBlock> blocks = addTeamBlocks(event.getUser(), ctx.getBotToken());
                         // Build a Home tab view
                         View appHomeView = view(view -> view
                                         .type("home")
@@ -83,10 +82,10 @@ public class SlackApp {
                         launchQuestions();
                         return null;
                 }));
-                return app;
+                return addActionHandlers(app);
         }
 
-        private List<LayoutBlock> addTeamBlocks(String user, String botToken, App app) {
+        private List<LayoutBlock> addTeamBlocks(String user, String botToken) {
                 TeamDto team = null;
                 List<LayoutBlock> blocks = new ArrayList<>();
                 try {
@@ -126,7 +125,7 @@ public class SlackApp {
                 blocks.add(divider());
                 listTeamMembers(team, blocks);
                 blocks.add(divider());
-                addTeamMemberBlock(blocks, app);
+                addTeamMemberBlock(blocks);
                 return blocks;
         }
 
@@ -147,7 +146,7 @@ public class SlackApp {
                 }
         }
 
-        private void addTeamMemberBlock(List<LayoutBlock> blocks, App app) {
+        private void addTeamMemberBlock(List<LayoutBlock> blocks) {
                 blocks.add(actions(action -> action
                                 .blockId("team_member_add_block")
                                 .elements(asElements(
@@ -189,7 +188,7 @@ public class SlackApp {
                                 value.setSelectedUser(null);
                                 View appHomeView = view(view -> view
                                         .type("home")
-                                        .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken(), app)));
+                                        .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken())));
                                 // TODO: Fix. This should work, but fails because the hash code does not match the current view.
                                 updateView(appHomeView, teamManagerId, req.getPayload().getView().getHash(), ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
