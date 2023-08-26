@@ -19,6 +19,7 @@ import org.springframework.core.env.Environment;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
+import com.slack.api.bolt.context.Context;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.event.AppHomeOpenedEvent;
@@ -68,14 +69,9 @@ public class SlackApp {
                                         .blocks(blocks));
                         // Update the App Home for the given user
                         if (event.getView() == null) {
-                                ctx.client().viewsPublish(r -> r
-                                                .userId(event.getUser())
-                                                .view(appHomeView));
+                                updateView(appHomeView, event.getUser(), null, ctx);
                         } else {
-                                ctx.client().viewsPublish(r -> r
-                                                .userId(event.getUser())
-                                                .hash(event.getView().getHash())
-                                                .view(appHomeView));
+                                updateView(appHomeView, event.getUser(), event.getView().getHash(), ctx);
                         }
                         return ctx.ack();
                 });
@@ -184,14 +180,7 @@ public class SlackApp {
                                 team = slackMethodHandler.addTeamMember(teamManagerId, selectedUserId,
                                                 ctx.getBotToken());
                                 value.setSelectedUser(null);
-                                ctx.asyncClient().viewsUpdate(r -> { 
-                                        View view = req.getPayload().getView();
-                                        r.view(view);
-                                        r.viewId(view.getId());
-                                        r.hash(view.getHash());
-                                        r.token(ctx.getBotToken());
-                                        return r;
-                                });
+                                updateView(req.getPayload().getView(), teamManagerId, req.getPayload().getView().getHash(), ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
@@ -224,6 +213,15 @@ public class SlackApp {
                         ));
                 }
                 return blocks;
+        }
+
+        private void updateView(View view, String userId, String hash, Context context) {
+                context.asyncClient().viewsPublish(r -> {
+                        r.view(view);
+                        r.userId(userId);
+                        r.hash(hash);
+                        return r;
+                });
         }
 
 }
