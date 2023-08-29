@@ -90,6 +90,7 @@ public class SlackApp {
                 List<LayoutBlock> blocks = new ArrayList<>();
                 try {
                         team = slackMethodHandler.checkTeamManager(user, botToken);
+                        logger.debug("Team retrieved, team: {}", team);
                 } catch (TeamManagerNotFoundException e) {
                         logger.debug("Slack user with id {} tried to access team without being a TeamManager", user);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
