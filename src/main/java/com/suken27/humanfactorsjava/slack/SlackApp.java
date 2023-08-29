@@ -237,6 +237,7 @@ public class SlackApp {
 
         private void updateView(View view, String userId, String hash, Context context) throws IOException, SlackApiException {
                 context.client().viewsPublish(r -> {
+                        logger.debug("Updating view, hash [{}]", hash);
                         r.view(view);
                         r.userId(userId);
                         r.hash(hash);
