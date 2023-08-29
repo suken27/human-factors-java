@@ -140,6 +140,7 @@ public class SlackApp {
 
         private void listTeamMembers(TeamDto team, List<LayoutBlock> blocks) {
                 for (TeamMemberDto member : team.getMembers()) {
+                        logger.debug("Team member with slack id {}", member.getSlackId());
                         if(member.getSlackId() != null) {
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "<@" + member.getSlackId() + "> is a team member.")))));
