@@ -90,7 +90,6 @@ public class SlackApp {
                 List<LayoutBlock> blocks = new ArrayList<>();
                 try {
                         team = slackMethodHandler.checkTeamManager(user, botToken);
-                        logger.debug("Team retrieved, team: {}", team);
                 } catch (TeamManagerNotFoundException e) {
                         logger.debug("Slack user with id {} tried to access team without being a TeamManager", user);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
@@ -140,7 +139,6 @@ public class SlackApp {
 
         private void listTeamMembers(TeamDto team, List<LayoutBlock> blocks) {
                 for (TeamMemberDto member : team.getMembers()) {
-                        logger.debug("Team member with slack id {}", member.getSlackId());
                         if(member.getSlackId() != null) {
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "<@" + member.getSlackId() + "> is a team member.")))));
@@ -238,7 +236,6 @@ public class SlackApp {
 
         private void updateView(View view, String userId, String hash, Context context) throws IOException, SlackApiException {
                 context.client().viewsPublish(r -> {
-                        logger.debug("Updating view, hash [{}]", hash);
                         r.view(view);
                         r.userId(userId);
                         r.hash(hash);

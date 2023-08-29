@@ -18,6 +18,7 @@ public class TeamMemberDto extends UserDto {
     public TeamMemberDto(TeamMember entity) {
         super(entity);
         setTeam(entity.getTeam().getId());
+        setSlackId(entity.getSlackId());
     }
 
 }
