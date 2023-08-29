@@ -19,11 +19,18 @@ public class HumanFactorFactory {
     public List<HumanFactorType> getAll() {
         if(all == null) {
             all = humanFactorTypeRepository.findAll();
-            all = humanFactorTypeRepository.findAllFetchActions(all);
-            all = humanFactorTypeRepository.findAllFetchQuestions(all);
-            all = humanFactorTypeRepository.findAllFetchDependsOn(all);
-            all = humanFactorTypeRepository.findAllFetchBibliographicSource(all);
+            List<HumanFactorType> actions = humanFactorTypeRepository.findAllFetchActions(all);
+            List<HumanFactorType> questions = humanFactorTypeRepository.findAllFetchQuestions(all);
+            List<HumanFactorType> dependsOn = humanFactorTypeRepository.findAllFetchDependsOn(all);
+            List<HumanFactorType> bibliographicSource = humanFactorTypeRepository.findAllFetchBibliographicSource(all);
+            for(int i = 0; i < all.size(); i++) {
+                all.get(i).setActionTypes(actions.get(i).getActionTypes());
+                all.get(i).setQuestionTypes(questions.get(i).getQuestionTypes());
+                all.get(i).setDependsOn(dependsOn.get(i).getDependsOn());
+                all.get(i).setBibliographicSource(bibliographicSource.get(i).getBibliographicSource());
+            }
         }
+        
         return all;
     }
 

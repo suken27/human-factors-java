@@ -5,7 +5,6 @@ INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUE
 INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUES (103, 'Education and learning', '', false, 0);
 INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUES (104, 'Team work', '', false, 0);
 INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUES (105, 'Responsibility and decision skills', '', false, 0);
-INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUES (106, 'Knowledge transfer', '', false, 0);
 INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUES (107, 'Computer self-efficacy', '', false, 0);
 -- PERCEPTION CLUSTER (1)
 INSERT INTO human_factor_type (id, title, description, only_once, cluster) VALUES (201, 'Voluntariness', '', false, 1);
@@ -184,9 +183,9 @@ INSERT INTO human_factor_type_question_types (human_factor_type_id, question_typ
 INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (104, 103);
 INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (105, 104);
 INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (105, 105);
-INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (106, 106);
-INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (106, 107);
-INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (106, 108);
+INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (102, 106);
+INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (102, 107);
+INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (102, 108);
 INSERT INTO human_factor_type_question_types (human_factor_type_id, question_types_id) VALUES (107, 109);
 -- PERCEPTION CLUSTER
 INSERT INTO question_type (id, only_for_management, is_negative, question_text, type_of_answer) VALUES (201, false, false, 'Could you accept or reject the methodology used by your team when it was introduced?', 0);
@@ -382,13 +381,13 @@ INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_i
 INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (105, 104);
 INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (104, 104);
 INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (106, 105);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (107, 106);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (101, 106);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (108, 106);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (109, 106);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (110, 106);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (111, 106);
-INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (112, 106);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (107, 102);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (101, 102);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (108, 102);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (109, 102);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (110, 102);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (111, 102);
+INSERT INTO human_factor_type_action_types (action_types_id, human_factor_type_id) VALUES (112, 102);
 -- PERCEPTION CLUSTER
 INSERT INTO action_type (id, title, description) VALUES (201, 'Trust belief actions', 'Trust belief for a development methodology relies on an individual trust towards the person that introduces the new methodology (see Trust).');
 INSERT INTO action_type (id, title, description) VALUES (202, 'Social influence actions', 'Social influence depends on the perceived usefulness of people known by an individual towards the new methodology (see Performance expectancy).');

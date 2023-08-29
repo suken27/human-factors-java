@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -29,8 +28,7 @@ public class Team {
 
     @OneToMany(
         mappedBy = "team",
-        cascade = CascadeType.ALL,
-        fetch = FetchType.EAGER
+        cascade = CascadeType.ALL
     )
     private List<TeamMember> members;
     @OneToMany(cascade = CascadeType.ALL)

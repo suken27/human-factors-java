@@ -191,7 +191,6 @@ public class SlackApp {
                                         .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken())));
                                 // TODO: Fix. This should work, but fails because the hash code does not match the current view.
                                 updateView(appHomeView, teamManagerId, req.getPayload().getView().getHash(), ctx);
-                                logger.debug("Hash: [{}]", req.getPayload().getView().getHash());
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
