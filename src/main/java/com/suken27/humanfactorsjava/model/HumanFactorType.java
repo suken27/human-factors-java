@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
@@ -22,13 +21,13 @@ public class HumanFactorType {
     private String description;
     private boolean onlyOnce;
     private Cluster cluster;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private List<BibliographicSource> bibliographicSource;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List<QuestionType> questionTypes;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private List<HumanFactorType> dependsOn;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private List<ActionType> actionTypes;
 
     public HumanFactorType() {
