@@ -35,6 +35,7 @@ public class SlackMethodHandler {
     @Autowired
     private ModelController modelController;
 
+    // These are the users that are currently in the workspace in Slack
     private final ConcurrentMap<String, User> usersStoreById = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, User> usersStoreByEmail = new ConcurrentHashMap<>();
 
@@ -97,9 +98,10 @@ public class SlackMethodHandler {
     public TeamDto addTeamMember(String teamManagerId, String userId, String slackBotToken)
             throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException,
             MemberAlreadyInTeamException, MemberInAnotherTeamException {
-        logger.debug("Add team member with slack id {}", userId);
-        return modelController.addTeamMember(getUserEmail(teamManagerId, slackBotToken),
+        TeamDto team = modelController.addTeamMember(getUserEmail(teamManagerId, slackBotToken),
                 getUserEmail(userId, slackBotToken), userId);
+        logger.debug("Team saved, members are: {}", team.getMembers());
+        return team;
     }
 
     public Map<UserDto, List<QuestionDto>> launchQuestions(String teamManagerId, String slackBotToken)
