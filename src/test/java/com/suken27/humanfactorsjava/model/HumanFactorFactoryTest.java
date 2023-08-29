@@ -15,16 +15,6 @@ public class HumanFactorFactoryTest {
     private HumanFactorFactory humanFactorFactory;
 
     @Test
-    void testCreateInstances() {
-
-    }
-
-    @Test
-    void testCreateTeamInstances() {
-
-    }
-
-    @Test
     void testGetAll() {
         List<HumanFactorType> all = humanFactorFactory.getAll();
         assertNotNull(all);

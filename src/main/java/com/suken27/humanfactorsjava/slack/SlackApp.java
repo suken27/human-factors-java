@@ -73,7 +73,7 @@ public class SlackApp {
                         if (event.getView() == null) {
                                 updateView(appHomeView, event.getUser(), null, ctx);
                         } else {
-                                updateView(appHomeView, event.getUser(), event.getView().getHash(), ctx);
+                                updateView(appHomeView, event.getUser(), null, ctx);
                         }
                         return ctx.ack();
                 });
@@ -190,7 +190,7 @@ public class SlackApp {
                                         .type("home")
                                         .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken())));
                                 // TODO: Fix. This should work, but fails because the hash code does not match the current view.
-                                updateView(appHomeView, teamManagerId, req.getPayload().getView().getHash(), ctx);
+                                updateView(appHomeView, teamManagerId, null, ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
