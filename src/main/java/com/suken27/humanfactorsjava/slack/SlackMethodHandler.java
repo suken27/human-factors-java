@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceExcep
 
 @Component
 public class SlackMethodHandler {
+
+    Logger logger = LoggerFactory.getLogger(SlackMethodHandler.class);
 
     @Autowired
     private ModelController modelController;
@@ -93,6 +97,7 @@ public class SlackMethodHandler {
     public TeamDto addTeamMember(String teamManagerId, String userId, String slackBotToken)
             throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException,
             MemberAlreadyInTeamException, MemberInAnotherTeamException {
+        logger.debug("Add team member with slack id {}", userId);
         return modelController.addTeamMember(getUserEmail(teamManagerId, slackBotToken),
                 getUserEmail(userId, slackBotToken), userId);
     }
