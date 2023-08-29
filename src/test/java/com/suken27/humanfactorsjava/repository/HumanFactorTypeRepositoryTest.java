@@ -23,6 +23,7 @@ public class HumanFactorTypeRepositoryTest {
     @Test
     public void testContent() {
         List<HumanFactorType> entities = repository.findAll();
+        entities = repository.findAllFetchDependsOn(entities);
         assertNotNull(entities);
         List<HumanFactorType> dependencies;
         for (HumanFactorType entity : entities) {

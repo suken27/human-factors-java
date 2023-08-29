@@ -18,7 +18,11 @@ public class HumanFactorFactory {
 
     public List<HumanFactorType> getAll() {
         if(all == null) {
-            all = humanFactorTypeRepository.findAllFetchEverything();
+            all = humanFactorTypeRepository.findAll();
+            all = humanFactorTypeRepository.findAllFetchActions(all);
+            all = humanFactorTypeRepository.findAllFetchQuestions(all);
+            all = humanFactorTypeRepository.findAllFetchDependsOn(all);
+            all = humanFactorTypeRepository.findAllFetchBibliographicSource(all);
         }
         return all;
     }

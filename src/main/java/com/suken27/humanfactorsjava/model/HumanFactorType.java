@@ -116,7 +116,7 @@ public class HumanFactorType {
     public HumanFactor createInstance() {
         HumanFactor humanFactor = new HumanFactor(this);
         ArrayList<Question> questions = new ArrayList<>();
-        for (QuestionType questionType : questionTypes) {
+        for (QuestionType questionType : getQuestionTypes()) {
             questions.add(questionType.createInstance());
         }
         humanFactor.setQuestions(questions);
@@ -126,7 +126,7 @@ public class HumanFactorType {
     public TeamHumanFactor createTeamInstance() {
         TeamHumanFactor humanFactor = new TeamHumanFactor(this);
         ArrayList<Action> actions = new ArrayList<>();
-        for (ActionType actionType : actionTypes) {
+        for (ActionType actionType : getActionTypes()) {
             actions.add(actionType.createInstance());
         }
         humanFactor.setActions(actions);
