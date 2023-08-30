@@ -69,6 +69,10 @@ public class HumanFactor {
     }
 
     public long oldestQuestionDaysSinceLastAnswer() {
+        Question question = getOldestQuestion();
+        if(question == null) {
+            return 0;
+        }
         return getOldestQuestion().daysSinceLastAnswer();
     }
 
