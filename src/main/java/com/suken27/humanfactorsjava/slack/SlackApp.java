@@ -23,6 +23,7 @@ import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.context.Context;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState.Value;
@@ -227,6 +228,7 @@ public class SlackApp {
                         messageBlocks.addAll(questionBlocks);
                         messageBlocks.add(divider());
                 }
+                blocks.add(messageBlocks);
                 return blocks;
         }
 
@@ -234,16 +236,16 @@ public class SlackApp {
                 List<LayoutBlock> blocks = new ArrayList<>();
                 blocks.add(section(section -> section
                         .text(markdownText(mt -> mt.text(question.getQuestionText())))));
+                List<BlockElement> elements = new ArrayList<>();
                 for (String option : question.getOptions()) {
-                        blocks.add(actions(action -> action
-                                .elements(asElements(
-                                        button(b -> b
-                                                .text(plainText(option))
-                                                .value(option)
-                                                .actionId("question_response_action"))
-                                ))
-                        ));
+                        elements.add(button(b -> b
+                                .text(plainText(option))
+                                .value(option)
+                                .actionId("question_response_action")));
                 }
+                blocks.add(actions(action -> action
+                        .elements(elements))
+                );
                 return blocks;
         }
 
@@ -265,12 +267,13 @@ public class SlackApp {
                 }
                 Map<UserDto, List<QuestionDto>> questions = slackMethodHandler.launchQuestions(context.getRequestUserId(), context.getBotToken());
                 for(Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
+                        logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
                         for(List<LayoutBlock> blocks : questionBlocks(entry.getValue())) {
                                 context.client().chatPostMessage(r -> {
-                                        logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
                                         r.channel(entry.getKey().getSlackId());
                                         r.blocks(blocks);
                                         r.token(context.getBotToken());
+                                        r.text("Human factors daily questions");
                                         return r;
                                 });
                         }
