@@ -10,10 +10,12 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class TeamMember extends User {
 
     @Column(nullable = false)

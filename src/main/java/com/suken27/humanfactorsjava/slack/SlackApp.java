@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import com.slack.api.model.view.ViewState.Value;
 import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
+import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
@@ -78,8 +80,11 @@ public class SlackApp {
                         return ctx.ack();
                 });
                 app.command("/questions", (req, ctx) -> ctx.ack(r -> {
-                        // TODO: Implement
-                        launchQuestions();
+                        try {
+                                launchQuestions(ctx);
+                        } catch (IOException | SlackApiException e) {
+                                logger.error("Error ocurred when using the SlackApi", e);
+                        }
                         return null;
                 }));
                 return addActionHandlers(app);
@@ -189,7 +194,6 @@ public class SlackApp {
                                 View appHomeView = view(view -> view
                                         .type("home")
                                         .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken())));
-                                // TODO: Fix. This should work, but fails because the hash code does not match the current view.
                                 updateView(appHomeView, teamManagerId, null, ctx);
                                 logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
                                         teamManagerId);
@@ -243,8 +247,15 @@ public class SlackApp {
                 });
         }
 
-        private void launchQuestions() {
-                // TODO: Implement
+        private void launchQuestions(Context context) throws IOException, SlackApiException {
+                // TODO: Check if the user is a team manager
+                Map<UserDto, List<QuestionDto>> questions = slackMethodHandler.launchQuestions(context.getRequestUserId(), context.getBotToken());
+                for(Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
+                        context.client().chatPostMessage(r -> r
+                                .channel(entry.getKey().getSlackId())
+                                .blocks(questionBlocks(entry.getValue()))
+                                .token(context.getBotToken()));
+                }
         }
 
 }

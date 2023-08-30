@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Question;
@@ -30,7 +30,7 @@ import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
 
-@Component
+@Controller
 public class ModelController {
 
     // TODO: Refactor model to decouple the messaging logic from the model
@@ -115,8 +115,8 @@ public class ModelController {
         teamMember = new TeamMember(humanFactorFactory.createInstances());
         teamMember.setEmail(email);
         teamMember.setTeam(team);
-        team.addMember(teamMember);
         teamMember.setSlackId(slackId);
+        team.addMember(teamMember);
         return new TeamDto(teamRepository.save(team));
     }
 
