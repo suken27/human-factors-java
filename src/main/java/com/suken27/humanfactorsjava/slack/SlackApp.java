@@ -79,14 +79,14 @@ public class SlackApp {
                         }
                         return ctx.ack();
                 });
-                app.command("/questions", (req, ctx) -> ctx.ack(r -> {
+                app.command("/questions", (req, ctx) -> {
                         try {
                                 launchQuestions(ctx);
                         } catch (IOException | SlackApiException e) {
                                 logger.error("Error ocurred when using the SlackApi", e);
                         }
-                        return null;
-                }));
+                        return ctx.ack();
+                });
                 return addActionHandlers(app);
         }
 
@@ -251,10 +251,14 @@ public class SlackApp {
                 // TODO: Check if the user is a team manager
                 Map<UserDto, List<QuestionDto>> questions = slackMethodHandler.launchQuestions(context.getRequestUserId(), context.getBotToken());
                 for(Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
-                        context.client().chatPostMessage(r -> r
-                                .channel(entry.getKey().getSlackId())
-                                .blocks(questionBlocks(entry.getValue()))
-                                .token(context.getBotToken()));
+                        context.client().chatPostMessage(r -> {
+                                logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
+                                // TODO: Apparently the slack id is null here
+                                r.channel(entry.getKey().getSlackId());
+                                r.blocks(questionBlocks(entry.getValue()));
+                                r.token(context.getBotToken());
+                                return r;
+                        });
                 }
         }
 
