@@ -15,8 +15,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
+@Data
+@EqualsAndHashCode(exclude = {"manager", "members", "humanFactors"})
 public class Team {
     
     @Id
@@ -55,30 +59,6 @@ public class Team {
         this.humanFactors = humanFactors;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TeamManager getManager() {
-        return manager;
-    }
-
-    public void setManager(TeamManager manager) {
-        this.manager = manager;
-    }
-
-    public List<TeamMember> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<TeamMember> members) {
-        this.members = members;
-    }
-
     public void addMember(TeamMember member) {
         members.add(member);
     }
@@ -102,30 +82,6 @@ public class Team {
         return members.stream().anyMatch(member -> member.getEmail().equals(email));
     }
 
-    public LocalTime getQuestionSendingTime() {
-        return questionSendingTime;
-    }
-
-    public void setQuestionSendingTime(LocalTime questionSendingTime) {
-        this.questionSendingTime = questionSendingTime;
-    }
-
-    public int getQuestionsPerDay() {
-        return questionsPerDay;
-    }
-
-    public void setQuestionsPerDay(int questionsPerDay) {
-        this.questionsPerDay = questionsPerDay;
-    }
-
-    public String getSlackBotToken() {
-        return slackBotToken;
-    }
-
-    public void setSlackBotToken(String slackBotToken) {
-        this.slackBotToken = slackBotToken;
-    }
-
     public Map<User, List<Question>> launchQuestions() {
         Map<User, List<Question>> questionMap = new HashMap<>();
         List<User> teamUsers = new ArrayList<>(members);
@@ -135,38 +91,5 @@ public class Team {
         }
         return questionMap;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Team other = (Team) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "Team [id=" + id + ", manager=" + manager.getId() + ", members=" + members + ", questionSendingTime="
-                + questionSendingTime + "]";
-    }
-
-    
 
 }

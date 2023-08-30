@@ -27,7 +27,7 @@ public class TeamMemberRepositoryTest {
     private HumanFactorFactory humanFactorFactory;
 
     private void createTeamMember(String email) {
-        TeamMember teamMember = new TeamMember(humanFactorFactory.createInstances());
+        TeamMember teamMember = new TeamMember(humanFactorFactory);
         teamMember.setEmail(email);
         teamMember = repository.save(teamMember);
         assertNotNull(teamMember);

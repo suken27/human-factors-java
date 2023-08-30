@@ -1,7 +1,6 @@
 package com.suken27.humanfactorsjava.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"team"})
 public class TeamMember extends User {
 
     @Column(nullable = false)
@@ -34,8 +33,8 @@ public class TeamMember extends User {
         super();
     }
 
-    public TeamMember(List<HumanFactor> humanFactors) {
-        super(humanFactors);
+    public TeamMember(HumanFactorFactory humanFactorFactory) {
+        super(humanFactorFactory.createInstances());
         deleted = false;
     }
     

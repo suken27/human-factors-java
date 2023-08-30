@@ -79,7 +79,7 @@ public class TeamControllerTest {
     @WithMockUser(username=TEST_TEAM_MANAGER_EMAIL, roles={"USER"})
     @Transactional
     public void testRemoveTeamMember() throws Exception {
-        TeamMember teamMember = new TeamMember(humanFactorFactory.createInstances());
+        TeamMember teamMember = new TeamMember(humanFactorFactory);
         teamMember.setEmail(TEST_TEAM_MEMBER_EMAIL);
         teamManager.getTeam().addMember(teamMember);
         teamRepository.save(teamManager.getTeam());

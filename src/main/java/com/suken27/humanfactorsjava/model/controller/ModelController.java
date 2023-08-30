@@ -112,7 +112,7 @@ public class ModelController {
         if(teamMember != null) {
             throw new MemberInAnotherTeamException(email);
         }
-        teamMember = new TeamMember(humanFactorFactory.createInstances());
+        teamMember = new TeamMember(humanFactorFactory);
         teamMember.setEmail(email);
         teamMember.setTeam(team);
         teamMember.setSlackId(slackId);
