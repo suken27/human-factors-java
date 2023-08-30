@@ -33,6 +33,7 @@ import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
+import com.suken27.humanfactorsjava.slack.exception.UserIsNotTeamManagerException;
 import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
 
 @Configuration
@@ -45,6 +46,7 @@ public class SlackApp {
 
         private static final String USER_SELECT_ACTION_ID = "team_member_select_action";
         private static final String ADD_MEMBER_BUTTON_ACTION_ID = "team_member_add_action";
+        private static final int MAX_BLOCKS_PER_MESSAGE = 50;
 
         @Bean
         public AppConfig loadOAuthConfig(Environment environment) {
@@ -212,11 +214,18 @@ public class SlackApp {
                 });
         }
 
-        private List<LayoutBlock> questionBlocks(List<QuestionDto> questions) {
-                List<LayoutBlock> blocks = new ArrayList<>();
+        private List<List<LayoutBlock>> questionBlocks(List<QuestionDto> questions) {
+                List<List<LayoutBlock>> blocks = new ArrayList<>();
+                List<LayoutBlock> messageBlocks = new ArrayList<>();
                 for(QuestionDto question : questions) {
-                        blocks.addAll(questionBlock(question));
-                        blocks.add(divider());
+                        List<LayoutBlock> questionBlocks = questionBlock(question);
+                        // Checks if adding one more question would exceed the maximum amount of blocks per message (including the divider)
+                        if(messageBlocks.size() + questionBlocks.size() + 1 > MAX_BLOCKS_PER_MESSAGE) {
+                                blocks.add(messageBlocks);
+                                messageBlocks = new ArrayList<>();
+                        }
+                        messageBlocks.addAll(questionBlocks);
+                        messageBlocks.add(divider());
                 }
                 return blocks;
         }
@@ -248,17 +257,23 @@ public class SlackApp {
         }
 
         private void launchQuestions(Context context) throws IOException, SlackApiException {
-                // TODO: Check if the user is a team manager
+                String userSlackId = context.getRequestUserId();
+                try {
+                        slackMethodHandler.checkTeamManager(userSlackId, userSlackId);
+                } catch (TeamManagerNotFoundException e) {
+                        throw new UserIsNotTeamManagerException(userSlackId);
+                }
                 Map<UserDto, List<QuestionDto>> questions = slackMethodHandler.launchQuestions(context.getRequestUserId(), context.getBotToken());
                 for(Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
-                        context.client().chatPostMessage(r -> {
-                                logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
-                                // TODO: Apparently the slack id is null here
-                                r.channel(entry.getKey().getSlackId());
-                                r.blocks(questionBlocks(entry.getValue()));
-                                r.token(context.getBotToken());
-                                return r;
-                        });
+                        for(List<LayoutBlock> blocks : questionBlocks(entry.getValue())) {
+                                context.client().chatPostMessage(r -> {
+                                        logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
+                                        r.channel(entry.getKey().getSlackId());
+                                        r.blocks(blocks);
+                                        r.token(context.getBotToken());
+                                        return r;
+                                });
+                        }
                 }
         }
 
