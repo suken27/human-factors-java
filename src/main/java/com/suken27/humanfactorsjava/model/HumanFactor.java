@@ -1,6 +1,7 @@
 package com.suken27.humanfactorsjava.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -36,6 +37,7 @@ public class HumanFactor {
     public HumanFactor(HumanFactorType humanFactorType) {
         super();
         type = humanFactorType;
+        questions = new ArrayList<>();
         for(QuestionType questionType : humanFactorType.getQuestionTypes()) {
             questions.add(questionType.createInstance());
         }

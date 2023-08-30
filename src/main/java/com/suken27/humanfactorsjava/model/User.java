@@ -62,10 +62,12 @@ public abstract class User {
         List<Question> questions = new ArrayList<>();
         long totalWeight = 0;
         for (HumanFactor humanFactor : humanFactors) {
-            questions.add(humanFactor.getOldestQuestion());
-            // The +1 is to avoid 0 total weight if the questions are launched the same day
-            // they are created.
-            totalWeight += humanFactor.oldestQuestionDaysSinceLastAnswer() + 1;
+            if (humanFactor.getOldestQuestion() != null) {
+                questions.add(humanFactor.getOldestQuestion());
+                // The +1 is to avoid 0 total weight if the questions are launched the same day
+                // they are created.
+                totalWeight += humanFactor.oldestQuestionDaysSinceLastAnswer() + 1;
+            }
         }
         double random;
         for (int i = 0; i < numberOfQuestions; i++) {
