@@ -8,6 +8,7 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -33,7 +34,7 @@ public class Question {
     private Long id;
     // This list should be a stack, but hibernate does not persist stacks. This list
     // should be used as Last Input First Output.
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Answer> answers;
     @ManyToOne
     private QuestionType type;
