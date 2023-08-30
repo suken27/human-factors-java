@@ -18,6 +18,7 @@ public class UserDto {
     public UserDto(User entity) {
         setId(entity.getId());
         setEmail(entity.getEmail());
+        setSlackId(entity.getSlackId());
     }
 
 }
