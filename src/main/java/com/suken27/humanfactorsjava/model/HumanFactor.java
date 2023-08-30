@@ -73,6 +73,9 @@ public class HumanFactor {
     }
 
     public Question getOldestQuestion() {
+        if(questions == null || questions.isEmpty()) {
+            return null;
+        }
         Question oldestQuestion = questions.get(0);
         for (Question question : questions) {
             if(question.getLastAnswerDateTime() == null) {
