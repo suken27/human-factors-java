@@ -222,7 +222,7 @@ public class SlackApp {
         } 
 
         private App addQuestionAnswerHandler(App app) {
-                return app.blockAction(Pattern.compile("question_answer_action_*"), (req, ctx) -> {
+                return app.blockAction(Pattern.compile("question_answer_action_.*"), (req, ctx) -> {
                         logger.debug("Question answer action received. Payload: {}", req.getPayload());
                         return ctx.ack();
                 });
