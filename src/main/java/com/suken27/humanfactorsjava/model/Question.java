@@ -59,14 +59,24 @@ public class Question {
         lastAnswerDateTime = LocalDate.now();
     }
 
-    public void answer(Answer answer) {
-        answer.setCreationTime(LocalDateTime.now());
-        answers.add(answer);
+    public void answer(Double answer) {
+        Answer answerEntity = new Answer();
+        answerEntity.setCreationTime(LocalDateTime.now());
+        answerEntity.setValue(getCorrectedValue(answer));
+        answers.add(answerEntity);
         lastAnswerDateTime = LocalDate.now();
     }
 
     public long daysSinceLastAnswer() {
         return ChronoUnit.DAYS.between(lastAnswerDateTime, LocalDate.now());
+    }
+
+    private Double getCorrectedValue(Double value) {
+        if(!type.isNegative()) {
+            return value;
+        }
+        // I hope that this doesn't lead to values being changed for precision issues.
+        return 1 - value;
     }
 
 }

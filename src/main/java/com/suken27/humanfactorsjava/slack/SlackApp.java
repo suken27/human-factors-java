@@ -224,6 +224,11 @@ public class SlackApp {
         private App addQuestionAnswerHandler(App app) {
                 return app.blockAction(Pattern.compile("question_answer_action_.*"), (req, ctx) -> {
                         logger.debug("Question answer action received. Payload: {}", req.getPayload());
+                        String[] actionIdParts = req.getPayload().getActions().get(0).getActionId().split("_");
+                        String questionId = actionIdParts[3];
+                        String answer = actionIdParts[4];
+                        slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
+                        logger.debug("Question [{}] answered with [{}]", questionId, answer);
                         return ctx.ack();
                 });
         }
@@ -250,11 +255,11 @@ public class SlackApp {
                 blocks.add(section(section -> section
                         .text(markdownText(mt -> mt.text(question.getQuestionText())))));
                 List<BlockElement> elements = new ArrayList<>();
-                for (String option : question.getOptions()) {
+                for (Entry<Double, String> option : question.getOptions().entrySet()) {
                         elements.add(button(b -> b
-                                .text(plainText(option))
-                                .value(option)
-                                .actionId("question_answer_action_" + question.getId() + "_" + option)));
+                                .text(plainText(option.getValue()))
+                                .value(option.getKey().toString())
+                                .actionId("question_answer_action_" + question.getId() + "_" + option.getKey().toString())));
                 }
                 blocks.add(actions(action -> action
                         .elements(elements))

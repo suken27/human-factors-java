@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +24,10 @@ import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
+import com.suken27.humanfactorsjava.model.exception.QuestionNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamMemberNotFoundException;
+import com.suken27.humanfactorsjava.repository.QuestionRepository;
 import com.suken27.humanfactorsjava.repository.TeamManagerRepository;
 import com.suken27.humanfactorsjava.repository.TeamMemberRepository;
 import com.suken27.humanfactorsjava.repository.TeamRepository;
@@ -50,6 +53,9 @@ public class ModelController {
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
+    private QuestionRepository questionRepository;
 
     public void checkUser(String email, String password) {
         TeamManager user = teamManagerRepository.findByEmail(email);
@@ -153,6 +159,16 @@ public class ModelController {
             questionsDto.put(new UserDto(user), QuestionDto.toDto(questions.get(user)));
         }
         return questionsDto;
+    }
+
+    public void answerQuestion(Long questionId, Double answer) {
+        Optional<Question> optionalQuestion = questionRepository.findById(questionId);
+        if(!optionalQuestion.isPresent()) {
+            throw new QuestionNotFoundException(questionId);
+        }
+        Question question = optionalQuestion.get();
+        question.answer(answer);
+        questionRepository.save(question);
     }
 
 }
