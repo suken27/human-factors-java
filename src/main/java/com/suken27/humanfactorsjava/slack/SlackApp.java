@@ -138,12 +138,17 @@ public class SlackApp {
                 return blocks;
         }
 
-        private App addActionHandlers(App app) {
-                app.blockAction(USER_SELECT_ACTION_ID, (req, ctx) -> {
+        private App addUserSelectionHandler(App app) {
+                return app.blockAction(USER_SELECT_ACTION_ID, (req, ctx) -> {
                         logger.debug("Team member select action received. Payload: {}", req.getPayload());
                         return ctx.ack();
                 });
-                return addTeamMemberHandler(app);
+        }
+
+        private App addActionHandlers(App app) {
+                app = addUserSelectionHandler(app);
+                app = addTeamMemberHandler(app);
+                return addQuestionAnswerHandler(app);
         }
 
         private void listTeamMembers(TeamDto team, List<LayoutBlock> blocks) {
