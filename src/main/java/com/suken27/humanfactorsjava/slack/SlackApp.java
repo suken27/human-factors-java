@@ -255,11 +255,13 @@ public class SlackApp {
                 blocks.add(section(section -> section
                         .text(markdownText(mt -> mt.text(question.getQuestionText())))));
                 List<BlockElement> elements = new ArrayList<>();
-                for (Entry<Double, String> option : question.getOptions().entrySet()) {
+                // iterate over the entries of the map sorted by key value
+                List<Double> optionKeys = question.getOptions().keySet().stream().sorted().toList();
+                for (Double key : optionKeys) {
                         elements.add(button(b -> b
-                                .text(plainText(option.getValue()))
-                                .value(option.getKey().toString())
-                                .actionId("question_answer_action_" + question.getId() + "_" + option.getKey().toString())));
+                                .text(plainText(question.getOptions().get(key)))
+                                .value(key.toString())
+                                .actionId("question_answer_action_" + question.getId() + "_" + key.toString())));
                 }
                 blocks.add(actions(action -> action
                         .elements(elements))
