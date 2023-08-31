@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class SlackApp {
                         } catch (IOException | SlackApiException e) {
                                 logger.error("Error ocurred when using the SlackApi", e);
                         }
-                        return ctx.ack();
+                        return ctx.ack("Questions launched");
                 });
                 return addActionHandlers(app);
         }
@@ -213,6 +214,13 @@ public class SlackApp {
                         }
                         return ctx.ack();
                 });
+        } 
+
+        private App addQuestionAnswerHandler(App app) {
+                return app.blockAction(Pattern.compile("question_answer_action_*"), (req, ctx) -> {
+                        logger.debug("Question answer action received. Payload: {}", req.getPayload());
+                        return ctx.ack();
+                });
         }
 
         private List<List<LayoutBlock>> questionBlocks(List<QuestionDto> questions) {
@@ -241,7 +249,7 @@ public class SlackApp {
                         elements.add(button(b -> b
                                 .text(plainText(option))
                                 .value(option)
-                                .actionId("question_answer_action")));
+                                .actionId("question_answer_action_" + question.getId() + "_" + option)));
                 }
                 blocks.add(actions(action -> action
                         .elements(elements))
@@ -269,7 +277,7 @@ public class SlackApp {
                 for(Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
                         logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
                         for(List<LayoutBlock> blocks : questionBlocks(entry.getValue())) {
-                                context.client().chatPostMessage(r -> {
+                                context.asyncClient().chatPostMessage(r -> {
                                         r.channel(entry.getKey().getSlackId());
                                         r.blocks(blocks);
                                         r.token(context.getBotToken());
