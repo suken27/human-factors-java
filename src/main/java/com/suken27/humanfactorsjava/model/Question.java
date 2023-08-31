@@ -62,7 +62,7 @@ public class Question {
     public void answer(Double answer) {
         Answer answerEntity = new Answer();
         answerEntity.setCreationTime(LocalDateTime.now());
-        answerEntity.setValue(getCorrectedValue(answer));
+        answerEntity.setAnswerValue(getCorrectedValue(answer));
         answers.add(answerEntity);
         lastAnswerDateTime = LocalDate.now();
     }

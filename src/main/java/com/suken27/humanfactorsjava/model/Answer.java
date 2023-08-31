@@ -15,6 +15,6 @@ public class Answer {
     @GeneratedValue
     private Long id;
     private LocalDateTime creationTime;
-    private Double value;
+    private Double answerValue;
 
 }
