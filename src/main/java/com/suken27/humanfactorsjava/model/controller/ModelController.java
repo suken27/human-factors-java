@@ -86,7 +86,11 @@ public class ModelController {
     }
 
     public TeamDto getTeam(String teamManagerEmail) {
-        return new TeamDto(teamRepository.findByTeamManagerEmail(teamManagerEmail));
+        Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+        if(team  == null) {
+            return null;
+        }
+        return new TeamDto(team);
     }
 
     public TeamDto updateTeam(TeamDto teamDto) {

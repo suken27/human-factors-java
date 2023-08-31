@@ -241,7 +241,7 @@ public class SlackApp {
                         elements.add(button(b -> b
                                 .text(plainText(option))
                                 .value(option)
-                                .actionId(option)));
+                                .actionId("question_answer_action")));
                 }
                 blocks.add(actions(action -> action
                         .elements(elements))
