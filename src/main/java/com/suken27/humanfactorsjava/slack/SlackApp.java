@@ -229,6 +229,13 @@ public class SlackApp {
                         String answer = actionIdParts[4];
                         slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
                         logger.debug("Question [{}] answered with [{}]", questionId, answer);
+                        ctx.asyncClient().chatUpdate(r -> {
+                                r.channel(req.getPayload().getContainer().getChannelId());
+                                r.ts(req.getPayload().getMessage().getTs());
+                                r.token(ctx.getBotToken());
+                                r.text("You answered " + answer);
+                                return r;
+                        });
                         return ctx.ack();
                 });
         }
