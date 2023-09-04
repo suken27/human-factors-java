@@ -229,7 +229,7 @@ public class SlackApp {
                         String answer = actionIdParts[4];
                         slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
                         logger.debug("Question [{}] answered with [{}]", questionId, answer);
-                        ctx.respond("answer received");
+                        ctx.respond(new ArrayList<>());
                         return ctx.ack();
                 });
         }
