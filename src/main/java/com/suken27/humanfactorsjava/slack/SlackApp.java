@@ -233,7 +233,9 @@ public class SlackApp {
                                 r.channel(req.getPayload().getContainer().getChannelId());
                                 r.ts(req.getPayload().getMessage().getTs());
                                 r.token(ctx.getBotToken());
-                                r.text("You answered " + answer);
+                                List<LayoutBlock> blocks = new ArrayList<>();
+                                blocks.add(header(h -> h.text(plainText("Answered question"))));
+                                r.blocks(blocks);
                                 return r;
                         });
                         return ctx.ack();
