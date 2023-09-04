@@ -233,9 +233,7 @@ public class SlackApp {
                                 r.channel(req.getPayload().getContainer().getChannelId());
                                 r.ts(req.getPayload().getMessage().getTs());
                                 r.token(ctx.getBotToken());
-                                List<LayoutBlock> blocks = new ArrayList<>();
-                                blocks.add(header(h -> h.text(plainText("Answered question"))));
-                                r.blocks(blocks);
+                                r.blocks(null);
                                 return r;
                         });
                         return ctx.ack();
@@ -290,7 +288,7 @@ public class SlackApp {
         private void launchQuestions(Context context) throws IOException, SlackApiException {
                 String userSlackId = context.getRequestUserId();
                 try {
-                        slackMethodHandler.checkTeamManager(userSlackId, userSlackId);
+                        slackMethodHandler.checkTeamManager(userSlackId, context.getBotToken());
                 } catch (TeamManagerNotFoundException e) {
                         throw new UserIsNotTeamManagerException(userSlackId);
                 }
