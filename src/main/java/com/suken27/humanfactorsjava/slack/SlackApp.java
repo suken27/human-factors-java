@@ -241,16 +241,8 @@ public class SlackApp {
                                 if(block instanceof ActionsBlock && block.getBlockId().equals(action.getBlockId())) {
                                         iterator.remove();
                                         iterator.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                                        "You answered: " + action.getValue())))));
-                                        found = true;
-                                }
-                        }
-                        for (LayoutBlock layoutBlock : blocks) {
-                                if(layoutBlock instanceof ActionsBlock && layoutBlock.getBlockId().equals(action.getBlockId())) {
-                                        blocks.remove(layoutBlock);
-                                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                         "You answered: " + answerText)))));
-                                        break;
+                                        found = true;
                                 }
                         }
                         ctx.respond(response -> response.blocks(blocks).replaceOriginal(true));

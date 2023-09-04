@@ -9,8 +9,13 @@ import java.util.Map;
 public enum TypeOfAnswer {
     VALUE_RANGE, FREQUENCY_RANGE, BINARY;
 
+    private Map<Double, String> options;
+
     public Map<Double, String> getOptions() {
-        Map<Double, String> options = new HashMap<>();
+        if (options != null) {
+            return options;
+        }
+        options = new HashMap<>();
         switch (this) {
             case VALUE_RANGE:
                 options.put(0.0, "Not at all");
