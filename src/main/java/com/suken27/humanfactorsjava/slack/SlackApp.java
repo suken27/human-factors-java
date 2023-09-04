@@ -233,7 +233,7 @@ public class SlackApp {
                                 r.channel(req.getPayload().getContainer().getChannelId());
                                 r.ts(req.getPayload().getMessage().getTs());
                                 r.token(ctx.getBotToken());
-                                r.blocks(null);
+                                r.blocks(new ArrayList<>());
                                 return r;
                         });
                         return ctx.ack();
