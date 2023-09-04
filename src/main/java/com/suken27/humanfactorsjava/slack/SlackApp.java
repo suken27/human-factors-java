@@ -229,13 +229,7 @@ public class SlackApp {
                         String answer = actionIdParts[4];
                         slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
                         logger.debug("Question [{}] answered with [{}]", questionId, answer);
-                        ctx.asyncClient().chatUpdate(r -> {
-                                r.channel(req.getPayload().getContainer().getChannelId());
-                                r.ts(req.getPayload().getMessage().getTs());
-                                r.token(ctx.getBotToken());
-                                r.blocks(new ArrayList<>());
-                                return r;
-                        });
+                        ctx.respond("answer received");
                         return ctx.ack();
                 });
         }
