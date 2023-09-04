@@ -229,7 +229,10 @@ public class SlackApp {
                         String answer = actionIdParts[4];
                         slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
                         logger.debug("Question [{}] answered with [{}]", questionId, answer);
-                        ctx.respond(new ArrayList<>());
+                        List<LayoutBlock> blocks = new ArrayList<>();
+                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                        "Your answer has been recorded :white_check_mark:")))));
+                        ctx.respond(blocks);
                         return ctx.ack();
                 });
         }
