@@ -59,12 +59,14 @@ public class Question {
         lastAnswerDateTime = LocalDate.now();
     }
 
-    public void answer(Double answer) {
+    //TODO: I am not super happy about this method returning a String only to be used by slack in the response.
+    public String answer(Double answer) {
         Answer answerEntity = new Answer();
         answerEntity.setCreationTime(LocalDateTime.now());
         answerEntity.setAnswerValue(getCorrectedValue(answer));
         answers.add(answerEntity);
         lastAnswerDateTime = LocalDate.now();
+        return type.getAnswerText(answer);
     }
 
     public long daysSinceLastAnswer() {

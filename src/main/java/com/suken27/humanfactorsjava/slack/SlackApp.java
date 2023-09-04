@@ -8,6 +8,7 @@ import static com.slack.api.model.view.Views.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -19,10 +20,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload.Action;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.context.Context;
 import com.slack.api.methods.SlackApiException;
+import com.slack.api.model.block.ActionsBlock;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.event.AppHomeOpenedEvent;
@@ -224,15 +227,33 @@ public class SlackApp {
         private App addQuestionAnswerHandler(App app) {
                 return app.blockAction(Pattern.compile("question_answer_action_.*"), (req, ctx) -> {
                         logger.debug("Question answer action received. Payload: {}", req.getPayload());
-                        String[] actionIdParts = req.getPayload().getActions().get(0).getActionId().split("_");
+                        Action action = req.getPayload().getActions().get(0);
+                        String[] actionIdParts = action.getActionId().split("_");
                         String questionId = actionIdParts[3];
                         String answer = actionIdParts[4];
-                        slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
-                        logger.debug("Question [{}] answered with [{}]", questionId, answer);
-                        List<LayoutBlock> blocks = new ArrayList<>();
-                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                        "Your answer has been recorded :white_check_mark:")))));
-                        ctx.respond(blocks);
+                        String answerText = slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
+                        logger.debug("Question [{}] answered with [{}]", questionId, answerText);
+                        List<LayoutBlock> blocks = req.getPayload().getMessage().getBlocks();
+                        ListIterator<LayoutBlock> iterator = blocks.listIterator();
+                        boolean found = false;
+                        while(iterator.hasNext() && !found) {
+                                LayoutBlock block = iterator.next();
+                                if(block instanceof ActionsBlock && block.getBlockId().equals(action.getBlockId())) {
+                                        iterator.remove();
+                                        iterator.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                        "You answered: " + action.getValue())))));
+                                        found = true;
+                                }
+                        }
+                        for (LayoutBlock layoutBlock : blocks) {
+                                if(layoutBlock instanceof ActionsBlock && layoutBlock.getBlockId().equals(action.getBlockId())) {
+                                        blocks.remove(layoutBlock);
+                                        blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
+                                                        "You answered: " + answerText)))));
+                                        break;
+                                }
+                        }
+                        ctx.respond(response -> response.blocks(blocks).replaceOriginal(true));
                         return ctx.ack();
                 });
         }

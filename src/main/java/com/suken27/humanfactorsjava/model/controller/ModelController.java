@@ -161,14 +161,15 @@ public class ModelController {
         return questionsDto;
     }
 
-    public void answerQuestion(Long questionId, Double answer) {
+    public String answerQuestion(Long questionId, Double answer) {
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if(!optionalQuestion.isPresent()) {
             throw new QuestionNotFoundException(questionId);
         }
         Question question = optionalQuestion.get();
-        question.answer(answer);
+        String text = question.answer(answer);
         questionRepository.save(question);
+        return text;
     }
 
 }

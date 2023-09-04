@@ -1,5 +1,7 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.util.Map;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -29,6 +31,11 @@ public class QuestionType {
      */
     public Question createInstance() {
         return new Question(this);
+    }
+
+    public String getAnswerText(Double answer) {
+        Map<Double, String> options = typeOfAnswer.getOptions();
+        return options.get(answer);
     }
 
 }
