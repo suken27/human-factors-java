@@ -1,13 +1,24 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ScheduledFuture;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.slack.api.methods.SlackApiException;
+import com.suken27.humanfactorsjava.model.dto.QuestionDto;
+import com.suken27.humanfactorsjava.model.dto.UserDto;
+import com.suken27.humanfactorsjava.slack.SlackController;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -15,13 +26,24 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Data
-@EqualsAndHashCode(exclude = {"manager", "members", "humanFactors"})
+@EqualsAndHashCode(exclude = {"manager", "members", "humanFactors", "scheduledQuestions", "threadPoolTaskScheduler", "modelController"})
+@Slf4j
 public class Team {
+
+    @Transient
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    @Transient
+    @Autowired
+    private SlackController slackController;
     
     @Id
     @GeneratedValue
@@ -40,6 +62,8 @@ public class Team {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
     private int questionsPerDay;
+    @Transient
+    private ScheduledFuture<?> scheduledQuestions;
     // TODO: Refactor to avoid coupling between the model and a specific messaging interface
     private String slackBotToken;
 
@@ -55,8 +79,18 @@ public class Team {
         manager = teamManager;
         members = new ArrayList<>();
         questionSendingTime = LocalTime.of(9, 0);
+        scheduleQuestions();
         questionsPerDay = 10;
         this.humanFactors = humanFactors;
+    }
+
+    /**
+     * Sets the time of the day when the questions will be sent and schedules the sending of the questions.
+     * @param questionSendingTime Time of the day when the questions will be sent (from Monday to Friday).
+     */
+    public void setQuestionSendingTime(LocalTime questionSendingTime) {
+        this.questionSendingTime = questionSendingTime;
+        scheduleQuestions();
     }
 
     public void addMember(TeamMember member) {
@@ -90,6 +124,31 @@ public class Team {
             questionMap.put(user, user.launchQuestions(questionsPerDay));
         }
         return questionMap;
+    }
+
+    public void sendQuestionsToSlack() throws SlackApiException, IOException {
+        if(slackBotToken == null) {
+            return;
+        }
+        Map<UserDto, List<QuestionDto>> questionsDto = new HashMap<>();
+        for(Entry<User, List<Question>> entry : launchQuestions().entrySet()) {
+            questionsDto.put(new UserDto(entry.getKey()), QuestionDto.toDto(entry.getValue()));
+        }
+        slackController.sendQuestionsToSlack(questionsDto, slackBotToken);
+    }
+
+    private void scheduleQuestions() {
+        if(scheduledQuestions != null) {
+            scheduledQuestions.cancel(false);
+        }
+        CronTrigger cronTrigger = new CronTrigger(questionSendingTime.getMinute() + " " + questionSendingTime.getHour() + " * * * 1-5");
+        scheduledQuestions = threadPoolTaskScheduler.schedule(() -> {
+            try {
+                sendQuestionsToSlack();
+            } catch (SlackApiException | IOException e) {
+                log.error("Error sending questions to Slack", e);
+            }
+        }, cronTrigger);
     }
 
 }

@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,8 +156,8 @@ public class ModelController {
         Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
         Map<User, List<Question>> questions = team.launchQuestions();
         Map<UserDto, List<QuestionDto>> questionsDto = new HashMap<>();
-        for(User user : questions.keySet()) {
-            questionsDto.put(new UserDto(user), QuestionDto.toDto(questions.get(user)));
+        for(Entry<User, List<Question>> entry : questions.entrySet()) {
+            questionsDto.put(new UserDto(entry.getKey()), QuestionDto.toDto(entry.getValue()));
         }
         return questionsDto;
     }

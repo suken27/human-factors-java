@@ -2,7 +2,6 @@ package com.suken27.humanfactorsjava.slack;
 
 import static com.slack.api.model.block.Blocks.*;
 import static com.slack.api.model.block.composition.BlockCompositions.*;
-import static com.slack.api.model.block.element.BlockElements.*;
 import static com.slack.api.model.view.Views.*;
 
 import java.io.IOException;
@@ -13,8 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,13 +24,11 @@ import com.slack.api.bolt.context.Context;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.model.block.ActionsBlock;
 import com.slack.api.model.block.LayoutBlock;
-import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState.Value;
 import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
-import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
@@ -41,17 +36,25 @@ import com.suken27.humanfactorsjava.rest.exception.MemberInAnotherTeamException;
 import com.suken27.humanfactorsjava.slack.exception.UserIsNotTeamManagerException;
 import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
+@Slf4j
 public class SlackApp {
+
+        // TODO: Refactor this class to move whatever can be moved to SlackBlockBuilder
+
+        // TODO: Maybe almost every action could be resolved using response?
 
         @Autowired
         private SlackMethodHandler slackMethodHandler;
 
-        public static final Logger logger = LoggerFactory.getLogger(SlackApp.class);
+        @Autowired
+        private SlackBlockBuilder slackBlockBuilder;
 
         private static final String USER_SELECT_ACTION_ID = "team_member_select_action";
         private static final String ADD_MEMBER_BUTTON_ACTION_ID = "team_member_add_action";
-        private static final int MAX_BLOCKS_PER_MESSAGE = 50;
+        private static final String USER_SELECT_BLOCK_ID = "team_member_add_block";
 
         @Bean
         public AppConfig loadOAuthConfig(Environment environment) {
@@ -90,7 +93,7 @@ public class SlackApp {
                         try {
                                 launchQuestions(ctx);
                         } catch (IOException | SlackApiException e) {
-                                logger.error("Error ocurred when using the SlackApi", e);
+                                log.error("Error ocurred when using the SlackApi", e);
                         }
                         return ctx.ack("Questions launched");
                 });
@@ -103,29 +106,29 @@ public class SlackApp {
                 try {
                         team = slackMethodHandler.checkTeamManager(user, botToken);
                 } catch (TeamManagerNotFoundException e) {
-                        logger.debug("Slack user with id {} tried to access team without being a TeamManager", user);
+                        log.debug("Slack user with id {} tried to access team without being a TeamManager", user);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "*You are not a team manager* :skull_and_crossbones:")))));
                 } catch (UserNotFoundInWorkspaceException e) {
                         // This is really improbable, but we should handle it anyway
-                        logger.error("Slack user with id [{}] not found in workspace. This exception should never be thrown.",
+                        log.error("Slack user with id [{}] not found in workspace. This exception should never be thrown.",
                                         user, e);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "*Unexpected error: Couldn't find the current user in the workspace* :warning:")))));
                 } catch (SlackApiException e) {
                         if (e.getError() != null && e.getError().getError().equals("ratelimited")) {
-                                logger.info("Too many requests to the Slack Api, the maximum amount of requests has been exceeded",
+                                log.info("Too many requests to the Slack Api, the maximum amount of requests has been exceeded",
                                                 e);
                                 blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                 "*Too many requests: Please try again in "
                                                                 + e.getResponse().header("Retry-After")
                                                                 + " seconds * :warning:")))));
                         }
-                        logger.error("Error ocurred when using the SlackApi", e);
+                        log.error("Error ocurred when using the SlackApi", e);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
                 } catch (IOException e) {
-                        logger.error("Error ocurred when using the SlackApi", e);
+                        log.error("Error ocurred when using the SlackApi", e);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
                 }
@@ -135,15 +138,16 @@ public class SlackApp {
                 }
                 blocks.add(header(h -> h.text(plainText("You are a team manager"))));
                 blocks.add(divider());
-                listTeamMembers(team, blocks);
+                slackBlockBuilder.listTeamMembers(blocks, team);
                 blocks.add(divider());
-                addTeamMemberBlock(blocks);
+                slackBlockBuilder.addTeamMemberBlock(blocks, USER_SELECT_BLOCK_ID, USER_SELECT_ACTION_ID,
+                                ADD_MEMBER_BUTTON_ACTION_ID);
                 return blocks;
         }
 
         private App addUserSelectionHandler(App app) {
                 return app.blockAction(USER_SELECT_ACTION_ID, (req, ctx) -> {
-                        logger.debug("Team member select action received. Payload: {}", req.getPayload());
+                        log.debug("Team member select action received. Payload: {}", req.getPayload());
                         return ctx.ack();
                 });
         }
@@ -154,46 +158,25 @@ public class SlackApp {
                 return addQuestionAnswerHandler(app);
         }
 
-        private void listTeamMembers(TeamDto team, List<LayoutBlock> blocks) {
-                for (TeamMemberDto member : team.getMembers()) {
-                        if(member.getSlackId() != null) {
-                                blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
-                                        "<@" + member.getSlackId() + "> is a team member.")))));
-                        } 
-                }
-        }
-
-        private void addTeamMemberBlock(List<LayoutBlock> blocks) {
-                blocks.add(actions(action -> action
-                                .blockId("team_member_add_block")
-                                .elements(asElements(
-                                                usersSelect(us -> us
-                                                                .actionId(USER_SELECT_ACTION_ID)
-                                                                .placeholder(plainText(
-                                                                                "Pick a user from the dropdown list"))),
-                                                button(b -> b
-                                                                .actionId(ADD_MEMBER_BUTTON_ACTION_ID)
-                                                                .text(plainText("Add selection")))))));
-        }
-
         private App addTeamMemberHandler(App app) {
                 return app.blockAction(ADD_MEMBER_BUTTON_ACTION_ID, (req, ctx) -> {
-                        logger.debug("Team member add action received. Payload: {}", req.getPayload());
-                        Map<String, Value> values = req.getPayload().getView().getState().getValues().get("team_member_add_block");
+                        log.debug("Team member add action received. Payload: {}", req.getPayload());
+                        Map<String, Value> values = req.getPayload().getView().getState().getValues()
+                                        .get(USER_SELECT_BLOCK_ID);
                         if (values == null) {
-                                logger.error("Team member add action received but no values were found in the actions block. Payload: {}",
+                                log.error("Team member add action received but no values were found in the actions block. Payload: {}",
                                                 req.getPayload());
                                 return ctx.ack();
                         }
                         Value value = values.get(USER_SELECT_ACTION_ID);
-                        if(value == null) {
-                                logger.error("Team member add action received but the user select block was not among the values included. Payload: {}",
+                        if (value == null) {
+                                log.error("Team member add action received but the user select block was not among the values included. Payload: {}",
                                                 req.getPayload());
                                 return ctx.ack();
                         }
                         String selectedUserId = value.getSelectedUser();
-                        if(selectedUserId == null) {
-                                logger.error("Team member add action received but no user was selected. Payload: {}",
+                        if (selectedUserId == null) {
+                                log.error("Team member add action received but no user was selected. Payload: {}",
                                                 req.getPayload());
                                 return ctx.ack();
                         }
@@ -204,41 +187,41 @@ public class SlackApp {
                                                 ctx.getBotToken());
                                 value.setSelectedUser(null);
                                 View appHomeView = view(view -> view
-                                        .type("home")
-                                        .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken())));
+                                                .type("home")
+                                                .blocks(addTeamBlocks(teamManagerId, ctx.getBotToken())));
                                 updateView(appHomeView, teamManagerId, null, ctx);
-                                logger.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
-                                        teamManagerId);
+                                log.debug("Team member [{}] added to the team managed by [{}]", selectedUserId,
+                                                teamManagerId);
                         } catch (MemberAlreadyInTeamException e) {
-                                logger.debug("Slack user with id [{}] tried to add a team member that is already in the team",
+                                log.debug("Slack user with id [{}] tried to add a team member that is already in the team",
                                                 teamManagerId);
                         } catch (MemberInAnotherTeamException e) {
-                                logger.debug("Slack user with id [{}] tried to add a team member that is already in another team",
+                                log.debug("Slack user with id [{}] tried to add a team member that is already in another team",
                                                 teamManagerId);
                         } catch (SlackApiException | IOException | UserNotFoundInWorkspaceException
                                         | TeamManagerNotFoundException e) {
-                                logger.error("Error ocurred when trying to add the team member [{}] to the team managed by [{}]",
+                                log.error("Error ocurred when trying to add the team member [{}] to the team managed by [{}]",
                                                 selectedUserId, teamManagerId, e);
                         }
                         return ctx.ack();
                 });
-        } 
+        }
 
         private App addQuestionAnswerHandler(App app) {
                 return app.blockAction(Pattern.compile("question_answer_action_.*"), (req, ctx) -> {
-                        logger.debug("Question answer action received. Payload: {}", req.getPayload());
+                        log.debug("Question answer action received. Payload: {}", req.getPayload());
                         Action action = req.getPayload().getActions().get(0);
                         String[] actionIdParts = action.getActionId().split("_");
                         String questionId = actionIdParts[3];
                         String answer = actionIdParts[4];
                         String answerText = slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
-                        logger.debug("Question [{}] answered with [{}]", questionId, answerText);
+                        log.debug("Question [{}] answered with [{}]", questionId, answerText);
                         List<LayoutBlock> blocks = req.getPayload().getMessage().getBlocks();
                         ListIterator<LayoutBlock> iterator = blocks.listIterator();
                         boolean found = false;
-                        while(iterator.hasNext() && !found) {
+                        while (iterator.hasNext() && !found) {
                                 LayoutBlock block = iterator.next();
-                                if(block instanceof ActionsBlock && block.getBlockId().equals(action.getBlockId())) {
+                                if (block instanceof ActionsBlock && block.getBlockId().equals(action.getBlockId())) {
                                         iterator.remove();
                                         iterator.add(section(section -> section.text(markdownText(mt -> mt.text(
                                                         "You answered: " + answerText)))));
@@ -250,43 +233,8 @@ public class SlackApp {
                 });
         }
 
-        private List<List<LayoutBlock>> questionBlocks(List<QuestionDto> questions) {
-                List<List<LayoutBlock>> blocks = new ArrayList<>();
-                List<LayoutBlock> messageBlocks = new ArrayList<>();
-                for(QuestionDto question : questions) {
-                        List<LayoutBlock> questionBlocks = questionBlock(question);
-                        // Checks if adding one more question would exceed the maximum amount of blocks per message (including the divider)
-                        if(messageBlocks.size() + questionBlocks.size() + 1 > MAX_BLOCKS_PER_MESSAGE) {
-                                blocks.add(messageBlocks);
-                                messageBlocks = new ArrayList<>();
-                        }
-                        messageBlocks.addAll(questionBlocks);
-                        messageBlocks.add(divider());
-                }
-                blocks.add(messageBlocks);
-                return blocks;
-        }
-
-        private List<LayoutBlock> questionBlock(QuestionDto question) {
-                List<LayoutBlock> blocks = new ArrayList<>();
-                blocks.add(section(section -> section
-                        .text(markdownText(mt -> mt.text(question.getQuestionText())))));
-                List<BlockElement> elements = new ArrayList<>();
-                // iterate over the entries of the map sorted by key value
-                List<Double> optionKeys = question.getOptions().keySet().stream().sorted().toList();
-                for (Double key : optionKeys) {
-                        elements.add(button(b -> b
-                                .text(plainText(question.getOptions().get(key)))
-                                .value(key.toString())
-                                .actionId("question_answer_action_" + question.getId() + "_" + key.toString())));
-                }
-                blocks.add(actions(action -> action
-                        .elements(elements))
-                );
-                return blocks;
-        }
-
-        private void updateView(View view, String userId, String hash, Context context) throws IOException, SlackApiException {
+        private void updateView(View view, String userId, String hash, Context context)
+                        throws IOException, SlackApiException {
                 context.client().viewsPublish(r -> {
                         r.view(view);
                         r.userId(userId);
@@ -302,10 +250,11 @@ public class SlackApp {
                 } catch (TeamManagerNotFoundException e) {
                         throw new UserIsNotTeamManagerException(userSlackId);
                 }
-                Map<UserDto, List<QuestionDto>> questions = slackMethodHandler.launchQuestions(context.getRequestUserId(), context.getBotToken());
-                for(Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
-                        logger.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
-                        for(List<LayoutBlock> blocks : questionBlocks(entry.getValue())) {
+                Map<UserDto, List<QuestionDto>> questions = slackMethodHandler
+                                .launchQuestions(context.getRequestUserId(), context.getBotToken());
+                for (Entry<UserDto, List<QuestionDto>> entry : questions.entrySet()) {
+                        log.debug("Sending questions to user [{}]", entry.getKey().getSlackId());
+                        for (List<LayoutBlock> blocks : slackBlockBuilder.questionBlocks(entry.getValue())) {
                                 context.asyncClient().chatPostMessage(r -> {
                                         r.channel(entry.getKey().getSlackId());
                                         r.blocks(blocks);

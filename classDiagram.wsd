@@ -1,5 +1,6 @@
 @startuml
 class HumanFactor {
+    Question getOldestQuestion()
     boolean isFullyAnswered()
     double getLatestAverageScore()
 }
@@ -11,7 +12,7 @@ class HumanFactorType {
     String description
     boolean onlyOnce
 
-    HumanFactor : createInstance()
+    HumanFactor createInstance()
 }
 class HumanFactorFactory {
     List<HumanFactor> createInstances()
@@ -23,7 +24,7 @@ class Action {
 class ActionType {
     String title
     String description
-    Action : createInstance()
+    Action createInstance()
 }
 class Question {
     boolean isAnswered()
@@ -39,7 +40,10 @@ class QuestionType {
     Question createInstance()
 }
 enum TypeOfAnswer
-abstract class User
+abstract class User {
+    String email
+    void launchQuestions(int number)
+}
 class Answer {
     LocalDateTime creationTime
 }
