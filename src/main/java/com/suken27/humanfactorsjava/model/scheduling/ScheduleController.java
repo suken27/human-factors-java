@@ -5,6 +5,7 @@ import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerBuilder;
@@ -23,6 +24,7 @@ public class ScheduleController {
     private Scheduler scheduler;
 
     public void scheduleJob(String name, String cronExpression, ModelController modelController, App slackApp, SlackBlockBuilder slackBlockBuilder, TeamDto team, String teamManagerEmail) throws SchedulerException {
+        scheduler.deleteJob(new JobKey(name));
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("modelController", modelController);
         jobDataMap.put("slackApp", slackApp);
