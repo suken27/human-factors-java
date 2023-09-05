@@ -3,6 +3,7 @@ package com.suken27.humanfactorsjava.rest.api;
 import java.io.IOException;
 import java.time.LocalTime;
 
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class TeamController {
     }
 
     @PutMapping("/teams/time")
-    public ResponseEntity<?> modifyQuestionSendingTime(@RequestBody String questionSendingTime) {
+    public ResponseEntity<?> modifyQuestionSendingTime(@RequestBody String questionSendingTime) throws ClassNotFoundException, NoSuchMethodException, SchedulerException {
         LocalTime localTime = validator.parseTimeString(questionSendingTime);
         if(localTime == null) {
             return ResponseEntity.badRequest().body(new IncorrectTimeFormatException(questionSendingTime));

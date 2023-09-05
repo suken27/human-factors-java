@@ -2,6 +2,7 @@ package com.suken27.humanfactorsjava.rest.api;
 
 import java.util.stream.Collectors;
 
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Validated @RequestBody AuthDto authDto) {
+    public ResponseEntity<?> registerUser(@Validated @RequestBody AuthDto authDto) throws ClassNotFoundException, NoSuchMethodException, SchedulerException {
         if (authDto == null) {
             return ResponseEntity.badRequest().body(new IncorrectEmailFormatException(null));
         }

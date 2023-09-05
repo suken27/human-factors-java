@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -72,7 +73,7 @@ public class SlackMethodHandler {
     }
 
     public TeamDto checkTeamManager(String id, String slackBotToken)
-            throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException {
+            throws UserNotFoundInWorkspaceException, SlackApiException, IOException, TeamManagerNotFoundException, ClassNotFoundException, NoSuchMethodException, SchedulerException {
         String email = getUserEmail(id, slackBotToken);
         TeamDto team = modelController.getTeam(email);
         if (team == null) {

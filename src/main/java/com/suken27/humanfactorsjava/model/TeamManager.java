@@ -1,6 +1,5 @@
 package com.suken27.humanfactorsjava.model;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +9,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@AttributeOverride(name = "email", column = @Column(unique = true))
 @Data
 @EqualsAndHashCode(callSuper = true, exclude = {"team"})
 public class TeamManager extends User {

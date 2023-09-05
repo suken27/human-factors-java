@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -92,7 +93,7 @@ public class SlackApp {
                 app.command("/questions", (req, ctx) -> {
                         try {
                                 launchQuestions(ctx);
-                        } catch (IOException | SlackApiException e) {
+                        } catch (Exception e) {
                                 log.error("Error ocurred when using the SlackApi", e);
                         }
                         return ctx.ack("Questions launched");
@@ -127,7 +128,7 @@ public class SlackApp {
                         log.error("Error ocurred when using the SlackApi", e);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
-                } catch (IOException e) {
+                } catch (Exception e) {
                         log.error("Error ocurred when using the SlackApi", e);
                         blocks.add(section(section -> section.text(markdownText(mt -> mt.text(
                                         "*Unexpected error: Error ocurred when using the SlackApi* :warning:")))));
@@ -243,7 +244,7 @@ public class SlackApp {
                 });
         }
 
-        private void launchQuestions(Context context) throws IOException, SlackApiException {
+        private void launchQuestions(Context context) throws IOException, SlackApiException, UserNotFoundInWorkspaceException, ClassNotFoundException, NoSuchMethodException, SchedulerException {
                 String userSlackId = context.getRequestUserId();
                 try {
                         slackMethodHandler.checkTeamManager(userSlackId, context.getBotToken());
