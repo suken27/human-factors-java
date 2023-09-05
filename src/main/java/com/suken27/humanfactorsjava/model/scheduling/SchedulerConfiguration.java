@@ -27,7 +27,7 @@ public class SchedulerConfiguration {
         protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
             Object jobInstance = super.createJobInstance(bundle);
             this.beanFactory.autowireBean(jobInstance);
-            this.beanFactory.initializeBean(jobInstance, null);
+            this.beanFactory.initializeBean(jobInstance, jobInstance.getClass().getName());
             return jobInstance;
         }
     }
