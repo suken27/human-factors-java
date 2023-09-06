@@ -2,6 +2,7 @@ package com.suken27.humanfactorsjava.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,4 +42,16 @@ public class TeamTest {
             assertEquals(13, entry.getValue().size());
         }
     }
+
+    @Test
+    void testTimeZoneOfQuestionSendingTime(@Autowired HumanFactorFactory humanFactorFactory) {
+        team = new Team(new TeamManager(humanFactorFactory), humanFactorFactory.createTeamInstances());
+        LocalTime questionSendingTime = team.getQuestionSendingTime();
+        assertNotNull(questionSendingTime);
+        LocalTime zonedQuestionSendingTime = team.getZonedQuestionSendingTime();
+        assertNotNull(zonedQuestionSendingTime);
+        assertEquals(9, zonedQuestionSendingTime.getHour());
+        assertEquals(0, zonedQuestionSendingTime.getMinute());
+    }
+    
 }

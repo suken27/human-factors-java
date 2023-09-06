@@ -70,7 +70,7 @@ public class Team {
 
     public void setQuestionSendingTime(LocalTime questionSendingTime) {
         ZonedDateTime zonedTime = LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone);
-        this.questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalTime();
+        this.questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalTime();
     }
 
     public void addMember(TeamMember member) {
