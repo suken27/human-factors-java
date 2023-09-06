@@ -176,6 +176,8 @@ public class ModelController {
 
 	public TeamDto modifyQuestionSendingTime(String teamManagerEmail, LocalTime questionSendingTime)
 			throws SchedulerException {
+		log.debug("Modifying question sending time to [{}] for team managed by [{}]", questionSendingTime,
+				teamManagerEmail);
 		Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
 		team.setQuestionSendingTime(questionSendingTime);
 		scheduleQuestions(team);

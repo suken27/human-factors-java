@@ -1,7 +1,10 @@
 package com.suken27.humanfactorsjava.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +44,7 @@ public class Team {
     private List<TeamHumanFactor> humanFactors;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
+    private ZoneId timeZone;
     private int questionsPerDay;
     // TODO: Refactor to avoid coupling between the model and a specific messaging interface
     private String slackBotToken;
@@ -56,9 +60,18 @@ public class Team {
         super();
         manager = teamManager;
         members = new ArrayList<>();
+        // This sets the question sending time to 9:00 spanish time.
         questionSendingTime = LocalTime.of(9, 0);
+        timeZone = ZoneId.systemDefault();
+        ZonedDateTime zonedTime = LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone);
+        questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalTime();
         questionsPerDay = 10;
         this.humanFactors = humanFactors;
+    }
+
+    public void setQuestionSendingTime(LocalTime questionSendingTime) {
+        ZonedDateTime zonedTime = LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone);
+        this.questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalTime();
     }
 
     public void addMember(TeamMember member) {
@@ -82,6 +95,16 @@ public class Team {
 
     public boolean isMember(String email) {
         return members.stream().anyMatch(member -> member.getEmail().equals(email));
+    }
+
+    public void setTimeZone(ZoneId timeZone) {
+        this.timeZone = timeZone;
+        ZonedDateTime zonedTime = LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone);
+        questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalTime();
+    }
+
+    public LocalTime getZonedQuestionSendingTime() {
+        return LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone).toLocalTime();
     }
 
     public Map<User, List<Question>> launchQuestions() {
