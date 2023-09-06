@@ -86,4 +86,15 @@ public abstract class User {
         return launchQuestions;
     }
 
+    public String answerQuestion(Long questionId, Double answer) {
+        for (HumanFactor humanFactor : humanFactors) {
+            for (Question question : humanFactor.getQuestions()) {
+                if (question.getId().equals(questionId)) {
+                    return question.answer(answer);
+                }
+            }
+        }
+        return null;
+    }
+
 }

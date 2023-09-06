@@ -41,6 +41,8 @@ public class Question {
     @ManyToOne
     private QuestionType type;
     private LocalDate lastAnswerDateTime;
+    private boolean isAnswered;
+    private Double score;
 
     /**
      * This constructor should never be used. Use Question(QuestionType) instead.
@@ -53,6 +55,7 @@ public class Question {
 
     public Question(QuestionType questionType) {
         super();
+        isAnswered = false;
         answers = new ArrayList<>();
         type = questionType;
         // Even if no answer has been given to this question, a date is saved so it can be sorted.
@@ -66,6 +69,8 @@ public class Question {
         answerEntity.setAnswerValue(getCorrectedValue(answer));
         answers.add(answerEntity);
         lastAnswerDateTime = LocalDate.now();
+        isAnswered = true;
+        score = answer;
         return type.getAnswerText(answer);
     }
 

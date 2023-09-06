@@ -215,7 +215,7 @@ public class SlackApp {
                         String[] actionIdParts = action.getActionId().split("_");
                         String questionId = actionIdParts[3];
                         String answer = actionIdParts[4];
-                        String answerText = slackMethodHandler.answerQuestion(Long.parseLong(questionId), answer);
+                        String answerText = slackMethodHandler.answerQuestion(ctx.getRequestUserId(), Long.parseLong(questionId), answer, ctx.getBotToken());
                         log.debug("Question [{}] answered with [{}]", questionId, answerText);
                         List<LayoutBlock> blocks = req.getPayload().getMessage().getBlocks();
                         ListIterator<LayoutBlock> iterator = blocks.listIterator();

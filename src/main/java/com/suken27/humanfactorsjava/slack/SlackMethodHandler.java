@@ -104,8 +104,8 @@ public class SlackMethodHandler {
         return modelController.launchQuestions(getUserEmail(teamManagerId, slackBotToken));
     }
 
-    public String answerQuestion(Long questionId, String answer) {
-        return modelController.answerQuestion(questionId, Double.parseDouble(answer));
+    public String answerQuestion(String userId, Long questionId, String answer, String slackBotToken) throws NumberFormatException, UserNotFoundInWorkspaceException, SlackApiException, IOException {
+        return modelController.answerQuestion(getUserEmail(userId, slackBotToken), questionId, Double.parseDouble(answer));
     }
 
     private void fetchUsers(String botToken) throws SlackApiException, IOException {

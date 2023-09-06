@@ -25,6 +25,8 @@ public class HumanFactor {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Question> questions;
     private LocalDate lastQuestionAnswered;
+    private boolean isFullyMeasured;
+    private Double score;
 
     /**
      * This constructor should never be used. Use HumanFactor(HumanFactorType) instead.
@@ -41,6 +43,7 @@ public class HumanFactor {
         for(QuestionType questionType : humanFactorType.getQuestionTypes()) {
             questions.add(questionType.createInstance());
         }
+        isFullyMeasured = false;
     }
 
     public long oldestQuestionDaysSinceLastAnswer() {
@@ -67,6 +70,39 @@ public class HumanFactor {
         return oldestQuestion;
     }
 
-        
+    public String answerQuestion(Long questionId, Double answer) {
+        for (Question question : questions) {
+            if(question.getId().equals(questionId)) {
+                String answerString = question.answer(answer);
+                updateHumanFactor();
+                return answerString;
+            }
+        }
+        return null;
+    }
+
+    public boolean canBeMeasured() {
+        return !questions.isEmpty();
+    }
+
+    private void updateHumanFactor() {
+        if(questions == null || questions.isEmpty()) {
+            return;
+        }
+        isFullyMeasured = true;
+        for (Question question : questions) {
+            if(!question.isAnswered()) {
+                isFullyMeasured = false;
+                break;
+            }
+        }
+        if(isFullyMeasured) {
+            score = 0.0d;
+            for (Question question : questions) {
+                score += question.getScore();
+            }
+            score /= questions.size();
+        }
+    }
 
 }

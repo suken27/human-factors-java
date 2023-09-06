@@ -124,4 +124,25 @@ public class Team {
         return questionMap;
     }
 
+    public List<Action> getRecommendedActions() {
+        return null;
+    }
+
+    public String answerQuestion(String userEmail, Long questionId, Double answer) {
+        User user = getMember(userEmail);
+        return user.answerQuestion(questionId, answer);
+    }
+
+    private User getMember(String memberEmail) {
+        if(manager.getEmail().equals(memberEmail)) {
+            return manager;
+        }
+        for (TeamMember member : members) {
+            if (member.getEmail().equals(memberEmail)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
 }

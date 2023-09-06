@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ import com.suken27.humanfactorsjava.model.Team;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.User;
+import com.suken27.humanfactorsjava.model.dto.ActionDto;
 import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
@@ -31,7 +31,6 @@ import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
-import com.suken27.humanfactorsjava.model.exception.QuestionNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamMemberNotFoundException;
 import com.suken27.humanfactorsjava.model.scheduling.ScheduleController;
@@ -194,14 +193,13 @@ public class ModelController {
 		return questionsDto;
 	}
 
-	public String answerQuestion(Long questionId, Double answer) {
-		Optional<Question> optionalQuestion = questionRepository.findById(questionId);
-		if (!optionalQuestion.isPresent()) {
-			throw new QuestionNotFoundException(questionId);
+	public String answerQuestion(String userEmail, Long questionId, Double answer) {
+		Team team = teamRepository.findByMemberEmail(userEmail);
+		if(team == null) {
+			throw new TeamMemberNotFoundException(userEmail);
 		}
-		Question question = optionalQuestion.get();
-		String text = question.answer(answer);
-		questionRepository.save(question);
+		String text = team.answerQuestion(userEmail, questionId, answer);
+		teamRepository.save(team);
 		return text;
 	}
 
@@ -219,6 +217,10 @@ public class ModelController {
 				});
 			}
 		}
+	}
+
+	public List<ActionDto> getRecommendedActions(String teamManagerEmail) {
+		return null;
 	}
 
 	private void scheduleQuestions(Team team) throws SchedulerException {

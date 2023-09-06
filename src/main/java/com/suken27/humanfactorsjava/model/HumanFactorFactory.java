@@ -1,7 +1,9 @@
 package com.suken27.humanfactorsjava.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,9 +45,18 @@ public class HumanFactorFactory {
     }
 
     public List<TeamHumanFactor> createTeamInstances() {
+        Map<HumanFactorType, TeamHumanFactor> map = new HashMap<>();
         List<TeamHumanFactor> humanFactors = new ArrayList<>();
         for (HumanFactorType humanFactorType : getAll()) {
-            humanFactors.add(humanFactorType.createTeamInstance());
+            TeamHumanFactor humanFactor = humanFactorType.createTeamInstance();
+            map.put(humanFactorType, humanFactor);
+            humanFactors.add(humanFactor);
+        }
+        // Adds the depending factors objects with aliasing
+        for (TeamHumanFactor humanFactor : humanFactors) {
+            for (HumanFactorType humanFactorType : humanFactor.getType().getDependsOn()) {
+                humanFactor.getDependingFactors().add(map.get(humanFactorType));
+            }
         }
         return humanFactors;
     }
