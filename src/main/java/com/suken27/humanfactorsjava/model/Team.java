@@ -99,7 +99,7 @@ public class Team {
     public void setTimeZone(ZoneId timeZone) {
         this.timeZone = timeZone;
         ZonedDateTime zonedTime = LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone);
-        questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalTime();
+        questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalTime();
     }
 
     public LocalTime getZonedQuestionSendingTime() {

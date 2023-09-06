@@ -52,6 +52,11 @@ public class TeamTest {
         assertNotNull(zonedQuestionSendingTime);
         assertEquals(9, zonedQuestionSendingTime.getHour());
         assertEquals(0, zonedQuestionSendingTime.getMinute());
+        team.setQuestionSendingTime(LocalTime.of(10, 30));
+        zonedQuestionSendingTime = team.getZonedQuestionSendingTime();
+        assertNotNull(zonedQuestionSendingTime);
+        assertEquals(10, zonedQuestionSendingTime.getHour());
+        assertEquals(30, zonedQuestionSendingTime.getMinute());
     }
-    
+
 }
