@@ -31,7 +31,7 @@ public class TeamDto {
             members.add(new TeamMemberDto(member));
         }
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        questionSendingTime = team.getQuestionSendingTime().format(dateTimeFormatter);
+        questionSendingTime = team.getZonedQuestionSendingTime().format(dateTimeFormatter);
         questionsPerDay = team.getQuestionsPerDay();
         slackBotToken = team.getSlackBotToken();
     }
