@@ -101,7 +101,7 @@ public class TeamControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put("/teams/time").content(TEST_QUESTION_SENDING_TIME)).andExpect(status().isOk());
         Team team = teamRepository.findByTeamManagerEmail(TEST_TEAM_MANAGER_EMAIL);
         assertNotNull(team);
-        LocalTime time = team.getQuestionSendingTime();
+        LocalTime time = team.getZonedQuestionSendingTime();
         assertNotNull(time);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         assertEquals(TEST_QUESTION_SENDING_TIME, time.format(dateTimeFormatter));

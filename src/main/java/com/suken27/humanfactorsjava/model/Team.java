@@ -63,7 +63,7 @@ public class Team {
         // This sets the question sending time to 9:00 spanish time.
         questionSendingTime = LocalTime.of(9, 0);
         timeZone = ZoneId.of("Europe/Madrid");
-        setQuestionSendingTime(questionSendingTime);
+        setZonedQuestionSendingTime(questionSendingTime);
         questionsPerDay = 10;
         this.humanFactors = humanFactors;
     }

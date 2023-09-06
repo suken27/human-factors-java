@@ -45,7 +45,8 @@ public class TeamTest {
 
     @Test
     void testTimeZoneOfQuestionSendingTime(@Autowired HumanFactorFactory humanFactorFactory) {
-        team = new Team(new TeamManager(humanFactorFactory), humanFactorFactory.createTeamInstances());
+        TeamManager teamManager = new TeamManager(humanFactorFactory);
+        Team team = teamManager.getTeam();
         LocalTime questionSendingTime = team.getQuestionSendingTime();
         assertNotNull(questionSendingTime);
         LocalTime zonedQuestionSendingTime = team.getZonedQuestionSendingTime();
