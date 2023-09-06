@@ -131,7 +131,7 @@ public class ModelController {
 		}
 		// parse questionSendingTime to LocalTime
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-		team.setQuestionSendingTime(LocalTime.parse(teamDto.getQuestionSendingTime(), dateTimeFormatter));
+		team.setZonedQuestionSendingTime(LocalTime.parse(teamDto.getQuestionSendingTime(), dateTimeFormatter));
 		team.setQuestionsPerDay(teamDto.getQuestionsPerDay());
 		team.setSlackBotToken(teamDto.getSlackBotToken());
 		scheduleQuestions(team);
@@ -179,7 +179,7 @@ public class ModelController {
 		log.debug("Modifying question sending time to [{}] for team managed by [{}]", questionSendingTime,
 				teamManagerEmail);
 		Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
-		team.setQuestionSendingTime(questionSendingTime);
+		team.setZonedQuestionSendingTime(questionSendingTime);
 		scheduleQuestions(team);
 		return new TeamDto(teamRepository.save(team));
 	}
