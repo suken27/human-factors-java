@@ -69,6 +69,14 @@ public class Team {
     }
 
     /**
+     * Gets the question sending time in the team's time zone. The time returned will be in the team's time zone.
+     * @return Time of the day to send the questions. This time is according the team's time zone.
+     */
+    public LocalTime getZonedQuestionSendingTime() {
+        return LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(ZoneId.systemDefault()).withZoneSameInstant(timeZone).toLocalTime();
+    }
+
+    /**
      * Sets the question sending time in the team's time zone. The time received should be in the team's time zone and the time stored will be in the system's time zone.
      * @param questionSendingTime Time of the day to send the questions. This time should be according the team's time zone.
      */
@@ -104,10 +112,6 @@ public class Team {
         this.timeZone = timeZone;
         ZonedDateTime zonedTime = LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone);
         questionSendingTime = zonedTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalTime();
-    }
-
-    public LocalTime getZonedQuestionSendingTime() {
-        return LocalDateTime.of(LocalDate.now(), questionSendingTime).atZone(timeZone).toLocalTime();
     }
 
     public Map<User, List<Question>> launchQuestions() {
