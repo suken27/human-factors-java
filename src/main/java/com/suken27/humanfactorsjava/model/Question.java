@@ -62,8 +62,7 @@ public class Question {
         lastAnswerDateTime = LocalDate.now();
     }
 
-    //TODO: I am not super happy about this method returning a String only to be used by slack in the response.
-    public String answer(Double answer) {
+    public void answer(Double answer) {
         Answer answerEntity = new Answer();
         answerEntity.setCreationTime(LocalDateTime.now());
         answerEntity.setAnswerValue(getCorrectedValue(answer));
@@ -71,11 +70,15 @@ public class Question {
         lastAnswerDateTime = LocalDate.now();
         isAnswered = true;
         score = answer;
-        return type.getAnswerText(answer);
+        type.getAnswerText(answer);
     }
 
     public long daysSinceLastAnswer() {
         return ChronoUnit.DAYS.between(lastAnswerDateTime, LocalDate.now());
+    }
+
+    public String answerValueToText(Double answer) {
+        return type.getAnswerText(answer);
     }
 
     private Double getCorrectedValue(Double value) {

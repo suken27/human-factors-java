@@ -70,12 +70,21 @@ public class HumanFactor {
         return oldestQuestion;
     }
 
-    public String answerQuestion(Long questionId, Double answer) {
+    /**
+     * 
+     * @param questionId
+     * @param answer
+     * @return The score of the human factor if all the questions have been answered, null otherwise.
+     */
+    public Double answerQuestion(Long questionId, Double answer) {
         for (Question question : questions) {
             if(question.getId().equals(questionId)) {
-                String answerString = question.answer(answer);
+                question.answer(answer);
                 updateHumanFactor();
-                return answerString;
+                if(isFullyMeasured) {
+                    return score;
+                }
+                return null;
             }
         }
         return null;

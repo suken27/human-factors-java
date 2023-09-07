@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -24,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Data
-@EqualsAndHashCode(exclude = {"manager", "members", "humanFactors", "scheduledQuestions"})
+@EqualsAndHashCode(exclude = {"manager", "members", "humanFactors"})
 @Slf4j
 public class Team {
     
@@ -42,6 +44,16 @@ public class Team {
     private List<TeamMember> members;
     @OneToMany(cascade = CascadeType.ALL)
     private List<TeamHumanFactor> humanFactors;
+    /**
+     * This map is a flattened nested map that represents a Map<HumanFactorType, Map<User, Double>>.
+     */
+    @ElementCollection
+    private Map<String, Double> humanFactorUserScores;
+    /**
+     * This map is a simplified map that represents a Map<HumanFactorType, Double>.
+     */
+    @ElementCollection
+    private Map<HumanFactorType, Double> humanFactorScores;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime questionSendingTime;
     private ZoneId timeZone;
@@ -66,6 +78,14 @@ public class Team {
         setZonedQuestionSendingTime(questionSendingTime);
         questionsPerDay = 10;
         this.humanFactors = humanFactors;
+        humanFactorUserScores = new HashMap<>();
+        for(TeamHumanFactor teamHumanFactor : humanFactors) {
+            String teamHumanFactorId = teamHumanFactor.getType().getId().toString();
+            for(User user : getAllMembers()) {
+                String userId = user.getId().toString();
+                humanFactorUserScores.put(teamHumanFactorId + "." + userId, null);
+            }
+        }
     }
 
     /**
@@ -87,6 +107,10 @@ public class Team {
 
     public void addMember(TeamMember member) {
         members.add(member);
+        for(Entry<HumanFactorType, Double> entry : humanFactorScores.entrySet()) {
+            humanFactorUserScores.put(entry.getKey() + "." + member.getId(), null);
+            updateHumanFactorScores(entry.getKey());
+        }
     }
 
     /**
@@ -95,6 +119,10 @@ public class Team {
      */
     public void removeMember(TeamMember member) {
         members.remove(member);
+        for(Entry<HumanFactorType, Double> entry : humanFactorScores.entrySet()) {
+            humanFactorUserScores.remove(entry.getKey() + "." + member.getId(), null);
+            updateHumanFactorScores(entry.getKey());
+        }
         member.setDeleted(true);
         member.setDeletionTime(LocalDateTime.now());
         member.setTeam(null);
@@ -116,33 +144,70 @@ public class Team {
 
     public Map<User, List<Question>> launchQuestions() {
         Map<User, List<Question>> questionMap = new HashMap<>();
-        List<User> teamUsers = new ArrayList<>(members);
-        teamUsers.add(manager);
-        for(User user : teamUsers) {
+        for(User user : getAllMembers()) {
             questionMap.put(user, user.launchQuestions(questionsPerDay));
         }
         return questionMap;
     }
 
     public List<Action> getRecommendedActions() {
-        return null;
+        Map<ActionType, Double> actionScores = new HashMap<>();
+        List<Action> recommendedActions = new ArrayList<>();
+        for(Entry<HumanFactorType, Double> entry : humanFactorScores.entrySet()) {
+            Double humanFactorScore = entry.getValue();
+            if(humanFactorScore == null) {
+                return recommendedActions;
+            }
+            List<ActionType> actions = entry.getKey().getActionTypes();
+            for(ActionType actionType : actions) {
+                actionScores.put(actionType, humanFactorScore);
+                // TODO: Consider the dependences between human factors to calculate the action score
+            }
+        }
+        return recommendedActions;
     }
 
-    public String answerQuestion(String userEmail, Long questionId, Double answer) {
+    public String answerQuestion(String userEmail, Question question, Double answer) {
         User user = getMember(userEmail);
-        return user.answerQuestion(questionId, answer);
+        HumanFactor humanFactor = user.answerQuestion(question, answer);
+        if(humanFactor != null) {
+            String key = humanFactor.getType().getId() + "." + user.getId();
+            humanFactorUserScores.put(key, humanFactor.getScore());
+            updateHumanFactorScores(humanFactor.getType());
+        }
+        return question.answerValueToText(answer);
     }
 
     private User getMember(String memberEmail) {
-        if(manager.getEmail().equals(memberEmail)) {
-            return manager;
-        }
-        for (TeamMember member : members) {
-            if (member.getEmail().equals(memberEmail)) {
-                return member;
+        for (User user : getAllMembers()) {
+            if (user.getEmail().equals(memberEmail)) {
+                return user;
             }
         }
         return null;
+    }
+
+    private List<User> getAllMembers() {
+        List<User> allMembers = new ArrayList<>(this.members);
+        allMembers.add(manager);
+        return allMembers;
+    }
+
+    private Double updateHumanFactorScores(HumanFactorType humanFactorType) {
+        Double average = 0.0;
+        List<User> allMembers = getAllMembers();
+        for(User user : allMembers) {
+            String key = humanFactorType.getId() + "." + user.getId();
+            Double userScore = humanFactorUserScores.get(key);
+            if(userScore == null) {
+                humanFactorUserScores.put(key, null);
+                return null;
+            }
+            average += userScore;
+        }
+        average /= allMembers.size();
+        humanFactorScores.put(humanFactorType, average);
+        return average;
     }
 
 }

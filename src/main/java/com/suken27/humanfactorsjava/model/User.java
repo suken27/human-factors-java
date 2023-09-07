@@ -14,6 +14,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -21,6 +22,7 @@ import lombok.Data;
 // replaced.
 @Table(name = "Users")
 @Data
+@Slf4j
 public abstract class User {
 
     @Id
@@ -86,11 +88,29 @@ public abstract class User {
         return launchQuestions;
     }
 
-    public String answerQuestion(Long questionId, Double answer) {
+    /**
+     * 
+     * @param questionId
+     * @param answer
+     * @return The human factor that was changed if it is fully measured, null otherwise.
+     */
+    public HumanFactor answerQuestion(Question question, Double answer) {
+        HumanFactor humanFactor = getHumanFactorByQuestion(question);
+        if(humanFactor == null) {
+            log.error("Question [{}] does not belong to any human factor", question.getId());
+            return null;
+        }
+        if(humanFactor.answerQuestion(question.getId(), answer) != null) {
+            return humanFactor;
+        }
+        return null;
+    }
+
+    private HumanFactor getHumanFactorByQuestion(Question question) {
         for (HumanFactor humanFactor : humanFactors) {
-            for (Question question : humanFactor.getQuestions()) {
-                if (question.getId().equals(questionId)) {
-                    return question.answer(answer);
+            for (Question humanFactorQuestion : humanFactor.getQuestions()) {
+                if (humanFactorQuestion.getId().equals(question.getId())) {
+                    return humanFactor;
                 }
             }
         }

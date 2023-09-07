@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
 import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
+import com.suken27.humanfactorsjava.model.exception.QuestionNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamManagerNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.TeamMemberNotFoundException;
 import com.suken27.humanfactorsjava.model.scheduling.ScheduleController;
@@ -198,7 +200,11 @@ public class ModelController {
 		if(team == null) {
 			throw new TeamMemberNotFoundException(userEmail);
 		}
-		String text = team.answerQuestion(userEmail, questionId, answer);
+		Optional<Question> optional = questionRepository.findById(questionId);
+		if(!optional.isPresent()) {
+			throw new QuestionNotFoundException(questionId);
+		}
+		String text = team.answerQuestion(userEmail, optional.get(), answer);
 		teamRepository.save(team);
 		return text;
 	}
