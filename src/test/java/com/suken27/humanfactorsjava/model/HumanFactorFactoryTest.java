@@ -23,7 +23,7 @@ public class HumanFactorFactoryTest {
             assertNotNull(humanFactorType.getTitle());
             assertNotNull(humanFactorType.getQuestionTypes());
             assertNotNull(humanFactorType.getActionTypes());
-            assertNotNull(humanFactorType.getDependsOn());
+            assertNotNull(humanFactorType.getAffectsTo());
             assertNotNull(humanFactorType.getBibliographicSource());
             if (humanFactorType.getQuestionTypes().size() > 0) {
                 for (QuestionType questionType : humanFactorType.getQuestionTypes()) {
@@ -37,8 +37,8 @@ public class HumanFactorFactoryTest {
                     assertNotNull(actionType.getTitle());
                 }
             }
-            if (humanFactorType.getDependsOn().size() > 0) {
-                for (HumanFactorType dependency : humanFactorType.getDependsOn()) {
+            if (humanFactorType.getAffectsTo().size() > 0) {
+                for (HumanFactorType dependency : humanFactorType.getAffectsTo()) {
                     assertNotNull(dependency);
                     assertNotNull(dependency.getTitle());
                 }

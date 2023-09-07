@@ -17,8 +17,8 @@ import lombok.ToString;
  */
 @Entity
 @Data
-@EqualsAndHashCode(exclude = {"bibliographicSource", "questionTypes", "dependsOn", "actionTypes"})
-@ToString(exclude = {"bibliographicSource", "questionTypes", "dependsOn", "actionTypes"})
+@EqualsAndHashCode(exclude = {"bibliographicSource", "questionTypes", "affectsTo", "actionTypes"})
+@ToString(exclude = {"bibliographicSource", "questionTypes", "affectsTo", "actionTypes"})
 public class HumanFactorType {
     
     @Id
@@ -32,7 +32,7 @@ public class HumanFactorType {
     @OneToMany
     private List<QuestionType> questionTypes;
     @ManyToMany
-    private List<HumanFactorType> dependsOn;
+    private List<HumanFactorType> affectsTo;
     @ManyToMany
     private List<ActionType> actionTypes;
 

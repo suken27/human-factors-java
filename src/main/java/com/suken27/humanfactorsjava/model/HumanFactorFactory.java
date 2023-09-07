@@ -26,10 +26,11 @@ public class HumanFactorFactory {
             List<HumanFactorType> dependsOn = humanFactorTypeRepository.findAllFetchDependsOn(all);
             List<HumanFactorType> bibliographicSource = humanFactorTypeRepository.findAllFetchBibliographicSource(all);
             for(int i = 0; i < all.size(); i++) {
-                all.get(i).setActionTypes(actions.get(i).getActionTypes());
-                all.get(i).setQuestionTypes(questions.get(i).getQuestionTypes());
-                all.get(i).setDependsOn(dependsOn.get(i).getDependsOn());
-                all.get(i).setBibliographicSource(bibliographicSource.get(i).getBibliographicSource());
+                HumanFactorType humanFactorType = all.get(i);
+                humanFactorType.setActionTypes(actions.get(i).getActionTypes());
+                humanFactorType.setQuestionTypes(questions.get(i).getQuestionTypes());
+                humanFactorType.setAffectsTo(dependsOn.get(i).getAffectsTo());
+                humanFactorType.setBibliographicSource(bibliographicSource.get(i).getBibliographicSource());
             }
         }
         
@@ -54,8 +55,8 @@ public class HumanFactorFactory {
         }
         // Adds the depending factors objects with aliasing
         for (TeamHumanFactor humanFactor : humanFactors) {
-            for (HumanFactorType humanFactorType : humanFactor.getType().getDependsOn()) {
-                humanFactor.getDependingFactors().add(map.get(humanFactorType));
+            for (HumanFactorType humanFactorType : humanFactor.getType().getAffectsTo()) {
+                humanFactor.getDependantFactors().add(map.get(humanFactorType));
             }
         }
         return humanFactors;

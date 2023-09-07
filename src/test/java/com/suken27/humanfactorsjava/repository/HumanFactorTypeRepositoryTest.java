@@ -31,7 +31,7 @@ public class HumanFactorTypeRepositoryTest {
         List<HumanFactorType> dependencies;
         for (HumanFactorType entity : entities) {
             assertNotNull(entity);
-            dependencies = entity.getDependsOn();
+            dependencies = entity.getAffectsTo();
             assertNotNull(dependencies);
             if(dependencies.size() > 0) {
                 for (HumanFactorType dependency : dependencies) {
@@ -86,9 +86,9 @@ public class HumanFactorTypeRepositoryTest {
         assertNotNull(entities);
         for(HumanFactorType humanFactorType : entities) {
             assertNotNull(humanFactorType);
-            assertNotNull(humanFactorType.getDependsOn());
-            if(humanFactorType.getDependsOn().size() > 0) {
-                for(HumanFactorType depends : humanFactorType.getDependsOn()) {
+            assertNotNull(humanFactorType.getAffectsTo());
+            if(humanFactorType.getAffectsTo().size() > 0) {
+                for(HumanFactorType depends : humanFactorType.getAffectsTo()) {
                     assertNotNull(depends);
                     assertNotNull(depends.getTitle());
                 }

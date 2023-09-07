@@ -21,11 +21,11 @@ public class TeamHumanFactor {
     @ManyToOne
     private HumanFactorType type;
     @ManyToMany(cascade = CascadeType.ALL)
-    private List<TeamHumanFactor> dependingFactors;
+    private List<TeamHumanFactor> dependantFactors;
     @ManyToMany(cascade = CascadeType.ALL)
     private List<Action> actions;
     private boolean isFullyMeasured;
-    private double score;
+    private Double score;
 
     /**
      * This constructor should never be used. Use TeamHumanFactor(HumanFactorType) instead.
@@ -36,7 +36,7 @@ public class TeamHumanFactor {
 
     public TeamHumanFactor(HumanFactorType type) {
         this.type = type;
-        dependingFactors = new ArrayList<>();
+        dependantFactors = new ArrayList<>();
     }
 
 }

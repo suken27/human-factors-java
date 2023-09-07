@@ -15,7 +15,7 @@ public interface HumanFactorTypeRepository extends JpaRepository<HumanFactorType
     @Query("Select hft from HumanFactorType hft left join fetch hft.actionTypes where hft in ?1")
     public List<HumanFactorType> findAllFetchActions(List<HumanFactorType> humanFactorTypes);
 
-    @Query("Select hft from HumanFactorType hft left join fetch hft.dependsOn where hft in ?1")
+    @Query("Select hft from HumanFactorType hft left join fetch hft.affectsTo where hft in ?1")
     public List<HumanFactorType> findAllFetchDependsOn(List<HumanFactorType> humanFactorTypes);
 
     @Query("Select hft from HumanFactorType hft left join fetch hft.bibliographicSource where hft in ?1")
