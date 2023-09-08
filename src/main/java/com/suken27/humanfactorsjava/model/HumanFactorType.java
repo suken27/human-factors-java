@@ -63,4 +63,13 @@ public class HumanFactorType {
         return humanFactor;
     }
 
+    public boolean isMemberMeasured() {
+        for(QuestionType questionType : getQuestionTypes()) {
+            if(!questionType.isOnlyForManagement()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

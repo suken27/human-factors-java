@@ -10,9 +10,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
+@EqualsAndHashCode(exclude = {"affectsTo", "affectedBy", "actions"})
+@ToString(exclude = {"affectsTo", "affectedBy", "actions"})
 public class TeamHumanFactor {
     
     @Id
@@ -21,7 +25,9 @@ public class TeamHumanFactor {
     @ManyToOne
     private HumanFactorType type;
     @ManyToMany(cascade = CascadeType.ALL)
-    private List<TeamHumanFactor> dependantFactors;
+    private List<TeamHumanFactor> affectsTo;
+    @ManyToMany
+    private List<TeamHumanFactor> affectedBy;
     @ManyToMany(cascade = CascadeType.ALL)
     private List<Action> actions;
     private boolean isFullyMeasured;
@@ -36,7 +42,8 @@ public class TeamHumanFactor {
 
     public TeamHumanFactor(HumanFactorType type) {
         this.type = type;
-        dependantFactors = new ArrayList<>();
+        affectsTo = new ArrayList<>();
+        affectedBy = new ArrayList<>();
     }
 
 }

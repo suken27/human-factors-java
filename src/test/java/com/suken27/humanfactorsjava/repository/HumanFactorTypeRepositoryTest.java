@@ -26,7 +26,7 @@ public class HumanFactorTypeRepositoryTest {
     @Test
     public void testContent() {
         List<HumanFactorType> entities = repository.findAll();
-        entities = repository.findAllFetchDependsOn(entities);
+        entities = repository.findAllFetchAffectsTo(entities);
         assertNotNull(entities);
         List<HumanFactorType> dependencies;
         for (HumanFactorType entity : entities) {
@@ -82,7 +82,7 @@ public class HumanFactorTypeRepositoryTest {
     void testFindAllFetchDependsOn() {
         List<HumanFactorType> entities = repository.findAll();
         assertNotNull(entities);
-        entities = repository.findAllFetchDependsOn(entities);
+        entities = repository.findAllFetchAffectsTo(entities);
         assertNotNull(entities);
         for(HumanFactorType humanFactorType : entities) {
             assertNotNull(humanFactorType);
