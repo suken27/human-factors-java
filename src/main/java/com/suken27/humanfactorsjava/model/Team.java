@@ -55,6 +55,7 @@ public class Team {
 	 * User.hashCode().
 	 */
 	@ElementCollection
+	@OneToMany(cascade = CascadeType.ALL)
 	private Map<String, Double> humanFactorUserScores;
 	@JsonFormat(pattern = "HH:mm")
 	private LocalTime questionSendingTime;
