@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
@@ -30,7 +31,7 @@ public class HumanFactorType {
     private Cluster cluster;
     @ManyToMany
     private List<BibliographicSource> bibliographicSource;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<QuestionType> questionTypes;
     @ManyToMany
     private List<HumanFactorType> affectsTo;
