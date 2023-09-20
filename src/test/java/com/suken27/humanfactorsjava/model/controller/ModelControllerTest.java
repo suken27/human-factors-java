@@ -33,4 +33,13 @@ public class ModelControllerTest {
         String answerText = modelController.answerQuestion(teamManager.getEmail(), teamManager.getHumanFactors().get(0).getQuestions().get(0).getId(), 0.0);
 		assertNotNull(answerText);
     }
+
+    @Test
+    @Transactional
+    void testGetRecommendedActions(@Autowired ModelController modelController) throws SchedulerException {
+        TeamManagerDto teamManagerDto = modelController.registerTeamManager(TEAM_MANAGER_EMAIL, TEAM_MANAGER_PASSWORD);
+        assertNotNull(teamManagerDto);
+        assertEquals(TEAM_MANAGER_EMAIL, teamManagerDto.getEmail());
+        // TODO: Find a way to create an environment with a created team and fulfilled questions so that the recommended actions can be generated
+    }
 }

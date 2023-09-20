@@ -3,6 +3,7 @@ package com.suken27.humanfactorsjava.model.controller;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import com.slack.api.bolt.App;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.model.block.LayoutBlock;
+import com.suken27.humanfactorsjava.model.Action;
 import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Question;
 import com.suken27.humanfactorsjava.model.Team;
@@ -225,8 +227,27 @@ public class ModelController {
 		}
 	}
 
+	/**
+	 * Returns the recommended actions for the team managed by the given team manager.
+	 * @param teamManagerEmail Email of the team manager.
+	 * @return List of recommended actions.
+	 */
 	public List<ActionDto> getRecommendedActions(String teamManagerEmail) {
-		return null;
+		Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+		if(team == null) {
+			throw new TeamManagerNotFoundException(teamManagerEmail);
+		}
+		Map<Action, Double> actions = team.getRecommendedActions();
+		List<ActionDto> actionsDto = new ArrayList<>();
+		for(Entry<Action, Double> entry : actions.entrySet()) {
+			ActionDto actionDto = new ActionDto();
+			actionDto.setId(entry.getKey().getId());
+			actionDto.setTitle(entry.getKey().getType().getTitle());
+			actionDto.setDescription(entry.getKey().getType().getDescription());
+			actionDto.setScore(entry.getValue());
+			actionsDto.add(actionDto);
+		}
+		return actionsDto;
 	}
 
 	private void scheduleQuestions(Team team) throws SchedulerException {

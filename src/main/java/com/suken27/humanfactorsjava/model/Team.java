@@ -172,24 +172,41 @@ public class Team {
 		return questionMap;
 	}
 
-	public List<Action> getRecommendedActions() {
-		Map<ActionType, Double> actionScores = new HashMap<>();
-		List<Action> recommendedActions = new ArrayList<>();
-		for (Entry<HumanFactorType, TeamHumanFactor> entry : humanFactors.entrySet()) {
-			TeamHumanFactor humanFactor = entry.getValue();
-			if (humanFactor.getScore() == null) {
-				return recommendedActions;
-			}
-			List<ActionType> actions = entry.getKey().getActionTypes();
-			for (ActionType actionType : actions) {
-				actionScores.put(actionType, humanFactor.getScore());
-				// TODO: Consider the dependences between human factors to calculate the action
-				// score
+	/**
+	 * Gets the recommended actions for the team. Only actions for fully measured
+	 * human factors are included.
+	 * 
+	 * @return Map of recommended actions and their score. The score is a value
+	 *         between 0.0 and 1.0 that measures how much the action is recommended,
+	 *         being 1.0 the maximum recommendation. This score is the inverse of
+	 *         the score of the human factor associated with the action.
+	 */
+	public Map<Action, Double> getRecommendedActions() {
+		Map<Action, Double> recommendedActions = new HashMap<>();
+		for (TeamHumanFactor humanFactor : humanFactors.values()) {
+			if (humanFactor.getScore() != null) {
+				for (Action action : humanFactor.getActions()) {
+					// If the action has already been recommended, the score is the maximum between all the scores calculated.
+					if(recommendedActions.get(action) != null) {
+						recommendedActions.put(action, Math.max(recommendedActions.get(action), 1 - humanFactor.getScore()));
+					} else {
+						recommendedActions.put(action, 1 - humanFactor.getScore());
+					}
+				}
 			}
 		}
 		return recommendedActions;
 	}
 
+	/**
+	 * Answers the question for the given user and returns the answer in text.
+	 * 
+	 * @param userEmail Email of the user that answers the question.
+	 * @param question  Question to answer.
+	 * @param answer    Answer to the question (value between 0.0 and 1.0)
+	 * @return Answer to the question in text.
+	 * @see Question
+	 */
 	public String answerQuestion(String userEmail, Question question, Double answer) {
 		User user = getMember(userEmail);
 		HumanFactor humanFactor = user.answerQuestion(question, answer);
@@ -224,7 +241,7 @@ public class Team {
 		TeamHumanFactor teamHumanFactor = humanFactors.get(humanFactorType);
 		int humanFactorScoresCounter = 1;
 		for (TeamHumanFactor affectedBy : teamHumanFactor.getAffectedBy()) {
-			if(affectedBy.getType() != origin) {
+			if (affectedBy.getType() != origin) {
 				// Precondition: No circular dependencies between human factors
 				Double affectedByScore = updateHumanFactorScores(affectedBy.getType(), humanFactorType);
 				// If not all the depending factors are available, the human factor score is
@@ -241,7 +258,7 @@ public class Team {
 		humanFactors.get(humanFactorType).setScore(average);
 		// Update the scores of the human factors that depend on this one
 		for (TeamHumanFactor affectsTo : teamHumanFactor.getAffectsTo()) {
-			if(affectsTo.getType() != origin) {
+			if (affectsTo.getType() != origin) {
 				// Precondition: No circular dependencies between human factors
 				updateHumanFactorScores(affectsTo.getType(), humanFactorType);
 			}

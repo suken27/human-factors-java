@@ -2,6 +2,7 @@ package com.suken27.humanfactorsjava.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -45,7 +46,7 @@ public class HumanFactorType {
      */
     public HumanFactor createInstance() {
         HumanFactor humanFactor = new HumanFactor(this);
-        ArrayList<Question> questions = new ArrayList<>();
+        List<Question> questions = new ArrayList<>();
         for (QuestionType questionType : getQuestionTypes()) {
             questions.add(questionType.createInstance());
         }
@@ -53,11 +54,23 @@ public class HumanFactorType {
         return humanFactor;
     }
 
-    public TeamHumanFactor createTeamInstance() {
+    /**
+     * Creates an instance of team human factor with this type as intrinsic state.
+     * @param sharedActions Map of shared actions to avoid creating multiple instances of the same action for the same team.
+     * @return Team human factor (extrinsic state) with this object as intrinsic state.
+     */
+    public TeamHumanFactor createTeamInstance(Map<ActionType, Action> sharedActions) {
         TeamHumanFactor humanFactor = new TeamHumanFactor(this);
-        ArrayList<Action> actions = new ArrayList<>();
+        List<Action> actions = new ArrayList<>();
+        Action action = null;
         for (ActionType actionType : getActionTypes()) {
-            actions.add(actionType.createInstance());
+            if(sharedActions.get(actionType) != null) {
+                action = sharedActions.get(actionType);
+            } else {
+                action = actionType.createInstance();
+                sharedActions.put(actionType, action);
+            }          
+            actions.add(action);
         }
         humanFactor.setActions(actions);
         return humanFactor;

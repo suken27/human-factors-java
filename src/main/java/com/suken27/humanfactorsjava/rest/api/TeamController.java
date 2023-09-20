@@ -2,6 +2,7 @@ package com.suken27.humanfactorsjava.rest.api;
 
 import java.io.IOException;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.slack.api.methods.SlackApiException;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
+import com.suken27.humanfactorsjava.model.dto.ActionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectEmailFormatException;
 import com.suken27.humanfactorsjava.rest.exception.IncorrectTimeFormatException;
@@ -74,7 +76,7 @@ public class TeamController {
     }
 
     @PutMapping("/teams/time")
-    public ResponseEntity<?> modifyQuestionSendingTime(@RequestBody String questionSendingTime) throws ClassNotFoundException, NoSuchMethodException, SchedulerException {
+    public ResponseEntity<?> modifyQuestionSendingTime(@RequestBody String questionSendingTime) throws SchedulerException {
         LocalTime localTime = validator.parseTimeString(questionSendingTime);
         if(localTime == null) {
             return ResponseEntity.badRequest().body(new IncorrectTimeFormatException(questionSendingTime));
@@ -82,6 +84,13 @@ public class TeamController {
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         TeamDto team = modelController.modifyQuestionSendingTime(teamManagerEmail, localTime);
         return ResponseEntity.ok().body(team);
+    }
+
+    @GetMapping("/teams/actions")
+    public ResponseEntity<?> getActions() {
+        String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<ActionDto> actions = modelController.getRecommendedActions(teamManagerEmail);
+        return ResponseEntity.ok().body(actions);
     }
 
 }

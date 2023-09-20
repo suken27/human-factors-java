@@ -47,9 +47,10 @@ public class HumanFactorFactory {
 
     public List<TeamHumanFactor> createTeamInstances() {
         Map<HumanFactorType, TeamHumanFactor> map = new HashMap<>();
+        Map<ActionType, Action> sharedActions = new HashMap<>();
         List<TeamHumanFactor> humanFactors = new ArrayList<>();
         for (HumanFactorType humanFactorType : getAll()) {
-            TeamHumanFactor humanFactor = humanFactorType.createTeamInstance();
+            TeamHumanFactor humanFactor = humanFactorType.createTeamInstance(sharedActions);
             map.put(humanFactorType, humanFactor);
             humanFactors.add(humanFactor);
         }
