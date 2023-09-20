@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -54,8 +55,7 @@ public class Team {
 	 * The String key is built using HumanFactorType.getId() + "." +
 	 * User.hashCode().
 	 */
-	@ElementCollection
-	@OneToMany(cascade = CascadeType.ALL)
+	@ElementCollection(fetch = FetchType.EAGER)
 	private Map<String, Double> humanFactorUserScores;
 	@JsonFormat(pattern = "HH:mm")
 	private LocalTime questionSendingTime;
