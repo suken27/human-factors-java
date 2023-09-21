@@ -40,13 +40,9 @@ public class Team {
 
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
 	private List<TeamMember> members;
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@ElementCollection
 	private Map<HumanFactorType, TeamHumanFactor> humanFactors;
-	// TODO: Y si un factor humano no tiene preguntas para los miembros, solo para
-	// el lider?
-	// Añadir una variable para registrar si el factor humano tiene puntuacion para
-	// todos los miembros y calcular esa variable en inicializacion
 	// TODO: Hash code could be the same for two different users, another value
 	// should be used for the map key
 	/**
