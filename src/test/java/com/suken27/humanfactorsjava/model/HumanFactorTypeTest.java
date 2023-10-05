@@ -19,6 +19,8 @@ public class HumanFactorTypeTest {
     private Map<ActionType, Action> sharedActions;
     private List<ActionType> actionTypes;
     private List<BibliographicSource> bibliographicSources;
+    private HumanFactor humanFactor;
+    private TeamHumanFactor teamHumanFactor;
 
     @BeforeEach
     public void setUp() {
@@ -58,16 +60,19 @@ public class HumanFactorTypeTest {
         questionType1.setQuestionText("Do you enjoy your work most of the time?");
         questionType1.setOnlyForManagement(false);
         questionType1.setNegative(false);
+        questionType1.setTypeOfAnswer(TypeOfAnswer.FREQUENCY_RANGE);
 
         questionType2.setId(2L);
         questionType2.setQuestionText("Do you hate the work with your team?");
         questionType2.setOnlyForManagement(true);
         questionType2.setNegative(true);
+        questionType2.setTypeOfAnswer(TypeOfAnswer.BINARY);
 
         questionType3.setId(3L);
         questionType3.setQuestionText("Do you love the work with your team?");
         questionType3.setOnlyForManagement(true);
         questionType3.setNegative(false);
+        questionType3.setTypeOfAnswer(TypeOfAnswer.BINARY);
 
         // Create new lists of QuestionType instances
         List<QuestionType> questionTypes1 = new ArrayList<QuestionType>();
@@ -127,40 +132,42 @@ public class HumanFactorTypeTest {
         sharedActions.put(actionType2, action2);
         sharedActions.put(actionType3, action3);
 
+        // Create new Team instance and humanFactorType instance
+        humanFactor = humanFactorType1.createInstance();
+        teamHumanFactor = humanFactorType1.createTeamInstance(sharedActions);
         
 
     }
 
     @Test
     public void testCreateInstance() {
-
-        HumanFactor instance = humanFactorType1.createInstance();
-        assertNotNull(instance);
-        assertEquals(2, instance.getQuestions().size());
+        assertNotNull(humanFactor);
+        assertEquals(2, humanFactor.getQuestions().size());
     }
 
     @Test
-    public void testQuestionsTypeInstances() {
-        HumanFactor instance = humanFactorType1.createInstance();
-
-        assertEquals(1L, instance.getQuestions().get(0).getType().getId());
+     public void testQuestionsTypeInstances() {
+        assertEquals(1L, humanFactor.getQuestions().get(0).getType().getId());
         assertEquals("Do you enjoy your work most of the time?",
-                instance.getQuestions().get(0).getType().getQuestionText());
-        assertEquals(false, instance.getQuestions().get(0).getType().isOnlyForManagement());
-        assertEquals(false, instance.getQuestions().get(0).getType().isNegative());
+                humanFactor.getQuestions().get(0).getType().getQuestionText());
+        assertEquals(false, humanFactor.getQuestions().get(0).getType().isOnlyForManagement());
+        assertEquals(false, humanFactor.getQuestions().get(0).getType().isNegative());
+        assertEquals(TypeOfAnswer.FREQUENCY_RANGE, humanFactor.getQuestions().get(0).getType().getTypeOfAnswer());
 
-        assertEquals(2L, instance.getQuestions().get(1).getType().getId());
+        assertEquals(2L, humanFactor.getQuestions().get(1).getType().getId());
         assertEquals("Do you hate the work with your team?",
-                instance.getQuestions().get(1).getType().getQuestionText());
-        assertEquals(true, instance.getQuestions().get(1).getType().isOnlyForManagement());
-        assertEquals(true, instance.getQuestions().get(1).getType().isNegative());
+                humanFactor.getQuestions().get(1).getType().getQuestionText());
+        assertEquals(true, humanFactor.getQuestions().get(1).getType().isOnlyForManagement());
+        assertEquals(true, humanFactor.getQuestions().get(1).getType().isNegative());
+        assertEquals(TypeOfAnswer.BINARY, humanFactor.getQuestions().get(1).getType().getTypeOfAnswer()); 
+
     }
+
 
     @Test
     public void testCreateTeamInstance() {
-       TeamHumanFactor teamInstance = humanFactorType1.createTeamInstance(sharedActions);
-       assertNotNull(teamInstance);
-       assertEquals(3, teamInstance.getActions().size());
+       assertNotNull(teamHumanFactor);
+       assertEquals(3, teamHumanFactor.getActions().size());
     }
 
     @Test
@@ -180,15 +187,14 @@ public class HumanFactorTypeTest {
 
     @Test
     public void testActionInstances() {
-        TeamHumanFactor teamInstance = humanFactorType1.createTeamInstance(sharedActions);
-        assertEquals(4L, teamInstance.getActions().get(0).getId());
-        assertEquals(1L, teamInstance.getActions().get(0).getType().getId());
+        assertEquals(4L, teamHumanFactor.getActions().get(0).getId());
+        assertEquals(1L, teamHumanFactor.getActions().get(0).getType().getId());
 
-        assertEquals(5L, teamInstance.getActions().get(1).getId());
-        assertEquals(2L, teamInstance.getActions().get(1).getType().getId());
+        assertEquals(5L, teamHumanFactor.getActions().get(1).getId());
+        assertEquals(2L, teamHumanFactor.getActions().get(1).getType().getId());
 
-        assertEquals(6L, teamInstance.getActions().get(2).getId());
-        assertEquals(3L, teamInstance.getActions().get(2).getType().getId()); 
+        assertEquals(6L, teamHumanFactor.getActions().get(2).getId());
+        assertEquals(3L, teamHumanFactor.getActions().get(2).getType().getId()); 
     } 
 
     @Test
