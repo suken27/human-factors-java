@@ -69,7 +69,7 @@ public class Question {
         answers.add(answerEntity);
         lastAnswerDateTime = LocalDate.now();
         isAnswered = true;
-        score = answer;
+        score = getCorrectedValue(answer);
         type.getAnswerText(answer);
     }
 
