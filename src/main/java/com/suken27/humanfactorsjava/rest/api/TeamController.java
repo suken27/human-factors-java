@@ -5,8 +5,6 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +26,10 @@ import com.suken27.humanfactorsjava.rest.util.ApiValidator;
 import com.suken27.humanfactorsjava.slack.SlackMethodHandler;
 import com.suken27.humanfactorsjava.slack.exception.UserNotFoundInWorkspaceException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@Slf4j
 public class TeamController {
 
     @Autowired
@@ -39,8 +40,6 @@ public class TeamController {
 
     @Autowired
     private ApiValidator validator;
-
-    private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
 
     @GetMapping("/teams")
     public ResponseEntity<?> getTeam() {
@@ -59,7 +58,7 @@ public class TeamController {
         try {
             id = slackMethodHandler.getUserId(email, teamManagerEmail);
         } catch(Exception e) {
-            logger.debug("Tried to retrieve member slack id for member [{}], but failed. No slack id will be added to the member.", email, e);
+            log.debug("Tried to retrieve member slack id for member [{}], but failed. No slack id will be added to the member.", email, e);
         }
         TeamDto team = modelController.addTeamMember(teamManagerEmail, email, id);
         return ResponseEntity.ok().body(team);
