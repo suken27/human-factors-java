@@ -18,7 +18,6 @@ import com.slack.api.model.User;
 import com.suken27.humanfactorsjava.model.controller.ModelController;
 import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
-import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
 import com.suken27.humanfactorsjava.model.dto.TeamMemberDto;
 import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
@@ -86,9 +85,7 @@ public class SlackMethodHandler {
             }
         }
         team.setSlackBotToken(slackBotToken);
-        TeamManagerDto teamManager = modelController.getTeamManager(email);
-        teamManager.setSlackId(id);
-        modelController.updateTeamManager(teamManager);
+        modelController.updateTeamManagerSlackId(email, id);
         return modelController.updateTeam(team);
     }
 

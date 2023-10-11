@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.suken27.humanfactorsjava.model.controller.ModelController;
 import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
+import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 
 @RestController
 public class UserController {
@@ -22,14 +23,18 @@ public class UserController {
     @PutMapping("/user/password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> json) {
         String teamManagerEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        modelController.checkUser(teamManagerEmail, json.get("oldPassword"));
-        TeamManagerDto teamManager = modelController.getTeamManager(teamManagerEmail);
         String newPassword = json.get("newPassword");
-        if(newPassword == null) {
+        String oldPassword = json.get("oldPassword");
+        if(newPassword == null || newPassword.isEmpty() || oldPassword == null || oldPassword.isEmpty()) {
             return ResponseEntity.badRequest().body("Empty password.");
         }
-        teamManager.setPassword(newPassword);
-        return ResponseEntity.ok().body(modelController.updateTeamManager(teamManager));
+        try {
+            return ResponseEntity.ok().body(modelController.updateTeamManagerPassword(teamManagerEmail, oldPassword, newPassword));
+        } catch(IncorrectLoginException e) {
+            return ResponseEntity.badRequest().body("Incorrect password.");
+        } catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/user/integration")

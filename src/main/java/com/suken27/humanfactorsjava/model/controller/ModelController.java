@@ -109,12 +109,24 @@ public class ModelController {
 		return new TeamManagerDto(teamManagerRepository.save(entity));
 	}
 
-	public TeamManagerDto updateTeamManager(TeamManagerDto teamManagerDto) {
-		TeamManager teamManager = teamManagerRepository.findByEmail(teamManagerDto.getEmail());
+	public TeamManagerDto updateTeamManagerSlackId(String email, String slackId) {
+		TeamManager teamManager = teamManagerRepository.findByEmail(email);
 		if (teamManager == null) {
-			throw new TeamManagerNotFoundException(teamManagerDto.getEmail());
+			throw new TeamManagerNotFoundException(email);
 		}
-		teamManager.setSlackId(teamManagerDto.getSlackId());
+		teamManager.setSlackId(slackId);
+		return new TeamManagerDto(teamManagerRepository.save(teamManager));
+	}
+
+	public TeamManagerDto updateTeamManagerPassword(String email, String oldPassword, String newPassword) {
+		TeamManager teamManager = teamManagerRepository.findByEmail(email);
+		if (teamManager == null) {
+			throw new TeamManagerNotFoundException(email);
+		}
+		if (!passwordEncoder.matches(oldPassword, teamManager.getPassword())) {
+			throw new IncorrectLoginException();
+		}
+		teamManager.setPassword(passwordEncoder.encode(newPassword));
 		return new TeamManagerDto(teamManagerRepository.save(teamManager));
 	}
 
