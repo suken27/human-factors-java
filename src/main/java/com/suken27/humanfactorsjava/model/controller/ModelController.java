@@ -23,15 +23,18 @@ import com.suken27.humanfactorsjava.model.Action;
 import com.suken27.humanfactorsjava.model.HumanFactorFactory;
 import com.suken27.humanfactorsjava.model.Question;
 import com.suken27.humanfactorsjava.model.Team;
+import com.suken27.humanfactorsjava.model.TeamHumanFactor;
 import com.suken27.humanfactorsjava.model.TeamManager;
 import com.suken27.humanfactorsjava.model.TeamMember;
 import com.suken27.humanfactorsjava.model.User;
 import com.suken27.humanfactorsjava.model.dto.ActionDto;
+import com.suken27.humanfactorsjava.model.dto.HumanFactorDto;
 import com.suken27.humanfactorsjava.model.dto.QuestionDto;
 import com.suken27.humanfactorsjava.model.dto.TeamDto;
 import com.suken27.humanfactorsjava.model.dto.TeamManagerDto;
 import com.suken27.humanfactorsjava.model.dto.UserDto;
 import com.suken27.humanfactorsjava.model.exception.EmailInUseException;
+import com.suken27.humanfactorsjava.model.exception.HumanFactorNotFoundException;
 import com.suken27.humanfactorsjava.model.exception.IncorrectLoginException;
 import com.suken27.humanfactorsjava.model.exception.MemberAlreadyInTeamException;
 import com.suken27.humanfactorsjava.model.exception.QuestionNotFoundException;
@@ -260,6 +263,27 @@ public class ModelController {
 			actionsDto.add(actionDto);
 		}
 		return actionsDto;
+	}
+
+	public List<HumanFactorDto> getAllHumanFactors(String teamManagerEmail) {
+		Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+		if(team == null) {
+			throw new TeamManagerNotFoundException(teamManagerEmail);
+		}
+		return HumanFactorDto.toDto(new ArrayList<>(team.getHumanFactors().values()));
+	}
+
+	public HumanFactorDto getHumanFactor(String teamManagerEmail, Long humanFactorId) {
+		Team team = teamRepository.findByTeamManagerEmail(teamManagerEmail);
+		if(team == null) {
+			throw new TeamManagerNotFoundException(teamManagerEmail);
+		}
+		for(TeamHumanFactor humanFactor : team.getHumanFactors().values()) {
+			if(humanFactor.getId().equals(humanFactorId)) {
+				return new HumanFactorDto(humanFactor);
+			}
+		}
+		throw new HumanFactorNotFoundException(humanFactorId);
 	}
 
 	private void scheduleQuestions(Team team) throws SchedulerException {
