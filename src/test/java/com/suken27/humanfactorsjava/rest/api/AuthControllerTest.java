@@ -44,19 +44,17 @@ public class AuthControllerTest {
 
     @BeforeAll
     private static void setAuthDto() {
-        dto = new AuthDto();
-        dto.setEmail("testCreateManager@test.test");
-        dto.setPassword("passwordTest");
+        dto = new AuthDto("testCreateManager@test.test", "passwordTest");
     }
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertNotNull(controller);
     }
 
     @Test
     @Transactional
-    public void testRegisterUser() throws Exception {
+    void testRegisterUser() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
                 .content("{\"email\":\"" + dto.getEmail() + "\",\"password\":\"" + dto.getPassword() + "\"}")
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
@@ -70,6 +68,54 @@ public class AuthControllerTest {
         assertNotNull(team);
         assertNotNull(team.getManager());
         assertEquals(entity, team.getManager());
+    }
+
+    @Test
+    @Transactional
+    void testErrorRegisterUser() throws Exception {
+        
+        String invalidEmail1 = "unformattedText";
+        String invalidEmail2 = "almostEmail@somethingcom";
+        String invalidEmail3 = "almostEmailsomething.com";
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
+                .content("{\"email\":\"" + dto.getEmail() + "\",\"password\":\"\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+        TeamManager entity = teamManagerRepository.findByEmail(dto.getEmail());
+        assertNull(entity);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
+                .content("{\"email\":\"\",\"password\":\"\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+        entity = teamManagerRepository.findByEmail(dto.getEmail());
+        assertNull(entity);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
+                .content("{\"email\":\"" + invalidEmail1 + "\",\"password\":" + dto.getPassword() + "\"\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
+                .andExpect(content().string(".*format is not valid.*"));
+        entity = teamManagerRepository.findByEmail(dto.getEmail());
+        assertNull(entity);
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
+                .content("{\"email\":\"" + invalidEmail2 + "\",\"password\":" + dto.getPassword() + "\"\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+        entity = teamManagerRepository.findByEmail(dto.getEmail());
+        assertNull(entity);
+        
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/signup")
+                .content("{\"email\":\"" + invalidEmail3 + "\",\"password\":" + dto.getPassword() + "\"\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+        entity = teamManagerRepository.findByEmail(dto.getEmail());
+        assertNull(entity);
+    }
+
+    @Test
+    @Transactional
+    void testAuthenticateUser() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
+                .content("{\"email\":\"" + dto.getEmail() + "\",\"password\":" + dto.getPassword() + "\"\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
     }
 
 }

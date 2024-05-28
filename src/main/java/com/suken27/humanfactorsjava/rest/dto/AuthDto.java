@@ -1,12 +1,18 @@
 package com.suken27.humanfactorsjava.rest.dto;
 
+import org.jetbrains.annotations.NotNull;
+
 public class AuthDto {
     
+    @NotNull
     private String email;
+    @NotNull
     private String password;
 
-    public AuthDto() {
+    public AuthDto(String email, String password) {
         super();
+        this.email = email;
+        this.password = password;
     }
 
     public String getEmail() {
