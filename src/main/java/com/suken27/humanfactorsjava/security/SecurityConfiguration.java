@@ -59,7 +59,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPointJwt))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(mvc.pattern("/login"), mvc.pattern("/signup"), mvc.pattern("/error**"))
+                        .requestMatchers(mvc.pattern("/login"), mvc.pattern("/signup"), mvc.pattern("/error**"), mvc.pattern("/slack/oauth_redirect"))
                         .permitAll().anyRequest().authenticated());
         http.authenticationProvider(daoAuthenticationProvider);
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
